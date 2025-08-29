@@ -2,6 +2,11 @@ package co.com.pragma.api;
 
 import co.com.pragma.api.dto.request.UserRequestRecord;
 import co.com.pragma.api.dto.response.UserResponseRecord;
+import co.com.pragma.api.exception.GlobalExceptionHandler;
+import co.com.pragma.api.exception.strategy.BusinessExceptionHandler;
+import co.com.pragma.api.exception.strategy.DefaultExceptionHandler;
+import co.com.pragma.api.exception.strategy.InvalidRequestExceptionHandler;
+import co.com.pragma.api.exception.strategy.ServerWebInputExceptionHandler;
 import co.com.pragma.api.mapper.UserDTOMapper;
 import co.com.pragma.model.exception.BusinessException;
 import co.com.pragma.model.user.User;
@@ -9,11 +14,13 @@ import co.com.pragma.usecase.user.UserUseCase;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
 import jakarta.validation.Validator;
+import org.mockito.Mockito;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,20 +35,47 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@WebFluxTest // Anotación principal para probar la capa web de WebFlux
-@Import({Router.class, Handler.class}) // Importa explícitamente el Router y el Handler al contexto del test
+@WebFluxTest(controllers = {})
+@Import({
+        Router.class,
+        Handler.class,
+        GlobalExceptionHandler.class,
+        InvalidRequestExceptionHandler.class,
+        BusinessExceptionHandler.class,
+        ServerWebInputExceptionHandler.class,
+        DefaultExceptionHandler.class,
+        RouterRestTest.TestConfig.class
+})
 class RouterRestTest {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public UserUseCase userUseCase() {
+            return Mockito.mock(UserUseCase.class);
+        }
+
+        @Bean
+        public UserDTOMapper userDTOMapper() {
+            return Mockito.mock(UserDTOMapper.class);
+        }
+
+        @Bean
+        public Validator validator() {
+            return Mockito.mock(Validator.class);
+        }
+    }
 
     @Autowired
     private WebTestClient webTestClient;
 
-    @MockBean
+    @Autowired
     private UserUseCase userUseCase;
 
-    @MockBean
+    @Autowired
     private UserDTOMapper userDTOMapper;
 
-    @MockBean
+    @Autowired
     private Validator validator;
 
     private UserRequestRecord userRequest;
