@@ -6,6 +6,8 @@ import co.com.pragma.model.user.User;
 import co.com.pragma.model.user.repository.UserRepository;
 import reactor.core.publisher.Mono;
 
+import static co.com.pragma.usecase.validation.ValidationConstants.*;
+
 public class UserValidator {
 
     private final UserRepository userRepository;
@@ -17,28 +19,39 @@ public class UserValidator {
     }
 
     public Mono<User> validateUser(User user) {
-        // 1. Validación síncrona: Rango de salario
-        if (user.baseSalary() < 0 || user.baseSalary() > 15000000) {
-            return Mono.error(new BusinessException("El salario base debe estar entre 0 y 15,000,000."));
-        }
-
-        // 2. Validaciones asíncronas
-        Mono<Void> roleValidation = validateRoleExistence(user);
-        Mono<Void> emailValidation = validateEmailUniqueness(user);
-
-        // 3. Ejecutar validaciones asíncronas en paralelo y proceder si ambas son exitosas
-        return Mono.when(roleValidation, emailValidation)
+        // Ejecutar todas las validaciones en paralelo.
+        // Si alguna falla, el Mono resultante fallará.
+        return Mono.when(
+                        validateSalaryRange(user),
+                        validateRoleExistence(user),
+                        validateEmailUniqueness(user)
+                )
+                // Si todas las validaciones son exitosas, se emite el usuario original.
                 .then(Mono.just(user));
     }
 
+    private Mono<Void> validateSalaryRange(User user) {
+        if (user.baseSalary() >= MIN_BASE_SALARY && user.baseSalary() <= MAX_BASE_SALARY) {
+            return Mono.empty(); // Salario válido, el Mono se completa.
+        }
+        return Mono.error(new BusinessException(SALARY_OUT_OF_RANGE_MESSAGE));
+    }
+
     private Mono<Void> validateRoleExistence(User user) {
-        return user.roleId() == null ? Mono.empty() :
-                roleRepository.existsById(user.roleId())
-                        .flatMap(exists -> !exists ? Mono.error(new BusinessException("El rol con ID '" + user.roleId() + "' no existe.")) : Mono.empty());
+        // Si no se provee un roleId, no se valida.
+        if (user.roleId() == null) {
+            return Mono.empty();
+        }
+        return roleRepository.existsById(user.roleId())
+                .filter(exists -> exists) // Deja pasar el flujo solo si 'exists' es true.
+                .switchIfEmpty(Mono.error(new BusinessException(String.format(ROLE_NOT_FOUND_MESSAGE, user.roleId()))))
+                .then(); // Convierte el Mono<Boolean> a Mono<Void>, ya que solo nos importa si hubo un error o no.
     }
 
     private Mono<Void> validateEmailUniqueness(User user) {
         return userRepository.existByEmail(user.email())
-                .flatMap(exists -> exists ? Mono.error(new BusinessException("El correo electrónico '" + user.email() + "' ya se encuentra registrado.")) : Mono.empty());
+                .filter(exists -> !exists) // Deja pasar el flujo solo si 'exists' es false.
+                .switchIfEmpty(Mono.error(new BusinessException(String.format(EMAIL_ALREADY_EXISTS_MESSAGE, user.email()))))
+                .then(); // Convierte el Mono<Boolean> a Mono<Void>.
     }
 }
