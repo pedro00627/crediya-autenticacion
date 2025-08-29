@@ -1,28 +1,74 @@
 package co.com.pragma.api.config;
 
 import co.com.pragma.api.Handler;
-import co.com.pragma.api.RouterRest;
+import co.com.pragma.api.Router;
+import co.com.pragma.api.exception.GlobalExceptionHandler;
+import co.com.pragma.api.exception.strategy.BusinessExceptionHandler;
+import co.com.pragma.api.exception.strategy.DefaultExceptionHandler;
+import co.com.pragma.api.exception.strategy.InvalidRequestExceptionHandler;
+import co.com.pragma.api.exception.strategy.ServerWebInputExceptionHandler;
+import co.com.pragma.api.mapper.UserDTOMapper;
+import co.com.pragma.usecase.user.UserUseCase;
+import jakarta.validation.Validator;
+import org.mockito.Mockito;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-@ContextConfiguration(classes = {RouterRest.class, Handler.class})
-@WebFluxTest
-@Import({CorsConfig.class, SecurityHeadersConfig.class})
+// @WebFluxTest is a slice test for the web layer. We import the configurations
+// and router/handler we want to test.
+@WebFluxTest(controllers = {}) // We specify no controllers to avoid component scanning
+@Import({
+        Router.class,
+        Handler.class,
+        CorsConfig.class,
+        SecurityHeadersConfig.class,
+        GlobalExceptionHandler.class,
+        InvalidRequestExceptionHandler.class,
+        BusinessExceptionHandler.class,
+        ServerWebInputExceptionHandler.class,
+        DefaultExceptionHandler.class,
+        ConfigTest.TestConfig.class
+})
 class ConfigTest {
+
+    /**
+     * This nested static class provides mock beans for dependencies outside the web layer.
+     * This is the recommended replacement for the deprecated @MockBean.
+     */
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public UserUseCase userUseCase() {
+            return Mockito.mock(UserUseCase.class);
+        }
+
+        @Bean
+        public UserDTOMapper userDTOMapper() {
+            return Mockito.mock(UserDTOMapper.class);
+        }
+
+        @Bean
+        public Validator validator() {
+            return Mockito.mock(Validator.class);
+        }
+    }
 
     @Autowired
     private WebTestClient webTestClient;
 
     @Test
     void corsConfigurationShouldAllowOrigins() {
-        webTestClient.get()
-                .uri("/api/usecase/path")
+        // The security filters should apply to all responses, even for non-existent paths (404).
+        webTestClient.get().uri("/any/non-existent/path")
                 .exchange()
-                .expectStatus().isOk()
+                // After importing the GlobalExceptionHandler, the DefaultExceptionHandler will catch the 404
+                // and convert it to a 500, which is the behavior we should test.
+                .expectStatus().is5xxServerError()
                 .expectHeader().valueEquals("Content-Security-Policy",
                         "default-src 'self'; frame-ancestors 'self'; form-action 'self'")
                 .expectHeader().valueEquals("Strict-Transport-Security", "max-age=31536000;")

@@ -19,7 +19,7 @@ import java.util.Set;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Component
-public class Handler {
+public class Handler implements UserApi {
     private static final Logger log = LogManager.getLogger(Handler.class);
 
     private final UserUseCase useCase;
@@ -32,6 +32,7 @@ public class Handler {
         this.validator = validator;
     }
 
+    @Override
     public Mono<ServerResponse> saveUseCase(ServerRequest serverRequest) {
         log.info("Recibida petición para guardar usuario en la ruta: {}", serverRequest.path());
         return serverRequest.bodyToMono(UserRequestRecord.class)
