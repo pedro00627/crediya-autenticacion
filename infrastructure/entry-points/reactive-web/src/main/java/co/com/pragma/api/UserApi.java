@@ -4,6 +4,7 @@ import co.com.pragma.api.dto.request.UserRequestRecord;
 import co.com.pragma.api.dto.response.UserResponseRecord;
 import co.com.pragma.api.exception.dto.ErrorBody;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -13,7 +14,6 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 public interface UserApi {
-
     @Operation(
             operationId = "saveUser",
             summary = "Crear un nuevo usuario",
@@ -30,4 +30,18 @@ public interface UserApi {
             }
     )
     Mono<ServerResponse> saveUseCase(ServerRequest serverRequest);
+
+    @Operation(
+            operationId = "obtener un usuario por email",
+            summary = "Consultar un usuario",
+            description = "Consultar un nuevo en el sistema.",
+            parameters = {
+                    @Parameter(name = "email", description = "Email del usuario a buscar.", required = true, in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Usuario creado exitosamente", content = @Content(schema = @Schema(implementation = UserResponseRecord.class))),
+                    @ApiResponse(responseCode = "204", description = "Petición inválida (ej. datos faltantes, formato incorrecto)", content = @Content(schema = @Schema(implementation = ErrorBody.class)))
+            }
+    )
+    Mono<ServerResponse> getUserByEmail(ServerRequest serverRequest);
 }

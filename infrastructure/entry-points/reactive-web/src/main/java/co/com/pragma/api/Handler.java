@@ -36,24 +36,40 @@ public class Handler implements UserApi {
     public Mono<ServerResponse> saveUseCase(ServerRequest serverRequest) {
         log.info("Recibida petición para guardar usuario en la ruta: {}", serverRequest.path());
         return serverRequest.bodyToMono(UserRequestRecord.class)
-                .switchIfEmpty(Mono.error(new ServerWebInputException("El cuerpo de la petición no puede estar vacío.")))
-                .flatMap(this::validateRequest)
+                .switchIfEmpty(Mono.error(new ServerWebInputException("El cuerpo de la petición no puede estar vacío."))) // Handle empty body
+                .flatMap(this::validateRequest) // Validate the DTO
                 .map(mapper::toModel)
                 .flatMap(useCase::saveUser)
-                .doOnSuccess(user -> log.info("Usuario guardado exitosamente con ID: {}", user.id()))
                 .flatMap(user -> ServerResponse.ok()
                         .contentType(APPLICATION_JSON)
                         .bodyValue(mapper.toResponse(user)));
     }
 
+    @Override
+    public Mono<ServerResponse> getUserByEmail(ServerRequest serverRequest) {
+        // Extract email from query parameter, handle if absent
+        return serverRequest.queryParam("email")
+                .map(email -> {
+                    log.info("Recibida petición para obtener usuario por email: {}", email);
+                    return useCase.getUserByEmail(email)
+                            .map(mapper::toResponse) // Use instance method reference
+                            .flatMap(response -> ServerResponse.ok()
+                                    .contentType(APPLICATION_JSON)
+                                    .bodyValue(response))
+                            .switchIfEmpty(ServerResponse.notFound().build()); // Handle user not found
+                })
+                .orElse(ServerResponse.badRequest() // Handle missing email parameter
+                        .contentType(APPLICATION_JSON)
+                        .bodyValue("{\"error\": \"El parámetro 'email' es requerido.\"}"));
+    }
+
+    // This method validates the UserRequestRecord DTO for the save operation.
     private Mono<UserRequestRecord> validateRequest(UserRequestRecord request) {
-        log.debug("Validando la estructura de la petición para el email: {}", request.email());
         Set<ConstraintViolation<UserRequestRecord>> violations = validator.validate(request);
         if (violations.isEmpty()) {
             return Mono.just(request);
         }
         log.warn("La validación de la petición falló. Violaciones: {}", violations);
-        // Lanza una excepción personalizada que será capturada por el GlobalExceptionHandler
-        return Mono.error(new InvalidRequestException(violations));
+        return Mono.error(new InvalidRequestException("Invalid request due to validation errors.", violations));
     }
 }
