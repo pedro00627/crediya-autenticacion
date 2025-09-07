@@ -28,9 +28,8 @@ public class UseCaseConfigTest {
     }
 
     @Configuration
-    @Import(UseCaseConfig.class) // Import the real configuration
+    @Import(UseCaseConfig.class)
     static class TestConfig {
-        // Provide a mock dependency for the real UseCaseConfig to use
         @Bean
         public UserRepository userRepository() {
             return Mockito.mock(UserRepository.class);

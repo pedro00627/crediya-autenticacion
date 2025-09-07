@@ -4,7 +4,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.postgresql:r2dbc-postgresql'
     implementation "org.reactivecommons.utils:object-mapper-api:${reactiveCommonsMapperVersion}"
-    implementation 'org.apache.logging.log4j:log4j-api'
     testImplementation "org.reactivecommons.utils:object-mapper:${reactiveCommonsMapperVersion}"
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"

@@ -6,5 +6,6 @@ import reactor.core.publisher.Mono;
 
 public interface ExceptionHandlerStrategy {
     boolean supports(Class<? extends Throwable> type);
+
     Mono<ErrorResponseWrapper> handle(Throwable ex, ServerWebExchange exchange);
 }

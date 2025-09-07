@@ -20,6 +20,9 @@ management:
     health:
       probes:
         enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 adapters:
@@ -31,11 +34,4 @@ adapters:
     username: postgres
     password: P1o2s3G4.
 logging:
-  level:
-    # 1. Nivel por defecto para todo: solo mostrar advertencias y errores.
-    root: WARN
-    # 2. Nivel para tu aplicación: aquí sí queremos ver los logs de INFO y DEBUG.
-    co.com.pragma: INFO
-    # 3. Nivel para componentes específicos de Spring (opcional, pero recomendado).
-    org.springframework.web: WARN
-    io.r2dbc: WARN
+  config: classpath:log4j2-spring.xml
