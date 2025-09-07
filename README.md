@@ -3,7 +3,7 @@
 ## Antes de Iniciar
 
 Empezaremos por explicar los diferentes componentes del proyectos y partiremos de los componentes externos, continuando
-con los componentes core de negocio (dominio) y por �ltimo el inicio y configuraci�n de la aplicaci�n.
+con los componentes core de negocio (dominio) y por último el inicio y configuración de la aplicación.
 
 Lee el
 art�culo [Clean Architecture � Aislando los detalles](https://medium.com/bancolombia-tech/clean-architecture-aislando-los-detalles-4f9530f35d7a)
@@ -14,13 +14,13 @@ art�culo [Clean Architecture � Aislando los detalles](https://medium.com/ban
 
 ## Domain
 
-Es el m�dulo m�s interno de la arquitectura, pertenece a la capa del dominio y encapsula la l�gica y reglas del negocio
+Es el módulo m�s interno de la arquitectura, pertenece a la capa del dominio y encapsula la lógica y reglas del negocio
 mediante modelos y entidades del dominio.
 
 ## Usecases
 
-Este m�dulo gradle perteneciente a la capa del dominio, implementa los casos de uso del sistema, define l�gica de
-aplicaci�n y reacciona a las invocaciones desde el m�dulo de entry points, orquestando los flujos hacia el m�dulo de
+Este módulo gradle perteneciente a la capa del dominio, implementa los casos de uso del sistema, define lógica de
+aplicación y reacciona a las invocaciones desde el módulo de entry points, orquestando los flujos hacia el módulo de
 entities.
 
 ## Infrastructure
@@ -44,13 +44,13 @@ interactuar.
 
 ### Entry Points
 
-Los entry points representan los puntos de entrada de la aplicaci�n o el inicio de los flujos de negocio.
+Los entry points representan los puntos de entrada de la aplicación o el inicio de los flujos de negocio.
 
 ## Application
 
-Este m�dulo es el m�s externo de la arquitectura, es el encargado de ensamblar los distintos m�dulos, resolver las
+Este módulo es el m�s externo de la arquitectura, es el encargado de ensamblar los distintos módulos, resolver las
 dependencias y crear los beans de los casos de use (UseCases) de forma autom�tica, inyectando en �stos instancias
-concretas de las dependencias declaradas. Adem�s inicia la aplicaci�n (es el �nico m�dulo del proyecto donde
+concretas de las dependencias declaradas. Adem�s inicia la aplicación (es el �nico módulo del proyecto donde
 encontraremos la funci�n �public static void main(String[] args)�.
 
 **Los beans de los casos de uso se disponibilizan automaticamente gracias a un '@ComponentScan' ubicado en esta capa.**

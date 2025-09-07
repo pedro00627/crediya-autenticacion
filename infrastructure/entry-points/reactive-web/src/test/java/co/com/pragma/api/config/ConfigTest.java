@@ -10,8 +10,8 @@ import co.com.pragma.api.exception.strategy.ServerWebInputExceptionHandler;
 import co.com.pragma.api.mapper.UserDTOMapper;
 import co.com.pragma.usecase.user.UserUseCase;
 import jakarta.validation.Validator;
-import org.mockito.Mockito;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -36,6 +36,27 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 })
 class ConfigTest {
 
+    @Autowired
+    private WebTestClient webTestClient;
+
+    @Test
+    void corsConfigurationShouldAllowOrigins() {
+        // The security filters should apply to all responses, even for non-existent paths (404).
+        webTestClient.get().uri("/any/non-existent/path")
+                .exchange()
+                // After importing the GlobalExceptionHandler, the DefaultExceptionHandler will catch the 404
+                // and convert it to a 500, which is the behavior we should test.
+                .expectStatus().is5xxServerError()
+                .expectHeader().valueEquals("Content-Security-Policy",
+                        "default-src 'self'; frame-ancestors 'self'; form-action 'self'")
+                .expectHeader().valueEquals("Strict-Transport-Security", "max-age=31536000;")
+                .expectHeader().valueEquals("X-Content-Type-Options", "nosniff")
+                .expectHeader().valueEquals("Server", "")
+                .expectHeader().valueEquals("Cache-Control", "no-store")
+                .expectHeader().valueEquals("Pragma", "no-cache")
+                .expectHeader().valueEquals("Referrer-Policy", "strict-origin-when-cross-origin");
+    }
+
     /**
      * This nested static class provides mock beans for dependencies outside the web layer.
      * This is the recommended replacement for the deprecated @MockBean.
@@ -56,27 +77,6 @@ class ConfigTest {
         public Validator validator() {
             return Mockito.mock(Validator.class);
         }
-    }
-
-    @Autowired
-    private WebTestClient webTestClient;
-
-    @Test
-    void corsConfigurationShouldAllowOrigins() {
-        // The security filters should apply to all responses, even for non-existent paths (404).
-        webTestClient.get().uri("/any/non-existent/path")
-                .exchange()
-                // After importing the GlobalExceptionHandler, the DefaultExceptionHandler will catch the 404
-                // and convert it to a 500, which is the behavior we should test.
-                .expectStatus().is5xxServerError()
-                .expectHeader().valueEquals("Content-Security-Policy",
-                        "default-src 'self'; frame-ancestors 'self'; form-action 'self'")
-                .expectHeader().valueEquals("Strict-Transport-Security", "max-age=31536000;")
-                .expectHeader().valueEquals("X-Content-Type-Options", "nosniff")
-                .expectHeader().valueEquals("Server", "")
-                .expectHeader().valueEquals("Cache-Control", "no-store")
-                .expectHeader().valueEquals("Pragma", "no-cache")
-                .expectHeader().valueEquals("Referrer-Policy", "strict-origin-when-cross-origin");
     }
 
 }

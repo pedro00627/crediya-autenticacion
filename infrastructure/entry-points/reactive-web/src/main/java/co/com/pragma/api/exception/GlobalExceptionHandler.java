@@ -1,10 +1,9 @@
 package co.com.pragma.api.exception;
 
 import co.com.pragma.api.exception.strategy.ExceptionHandlerStrategy;
+import co.com.pragma.model.log.gateways.LoggerPort;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
@@ -18,11 +17,12 @@ import java.util.List;
 @Order(-2) // Se asegura de que se ejecute antes que el manejador de errores por defecto de Spring
 public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
-    private static final Logger log = LogManager.getLogger(GlobalExceptionHandler.class);
+    private final LoggerPort logger;
     private final ObjectMapper objectMapper;
     private final List<ExceptionHandlerStrategy> strategies;
 
-    public GlobalExceptionHandler(ObjectMapper objectMapper, List<ExceptionHandlerStrategy> strategies) {
+    public GlobalExceptionHandler(LoggerPort logger, ObjectMapper objectMapper, List<ExceptionHandlerStrategy> strategies) {
+        this.logger = logger;
         this.objectMapper = objectMapper;
         this.strategies = strategies;
     }
@@ -42,7 +42,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
                         byte[] bytes = objectMapper.writeValueAsBytes(errorWrapper.body());
                         return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(bytes)));
                     } catch (JsonProcessingException e) {
-                        log.error("Error escribiendo la respuesta de error en formato JSON", e);
+                        logger.error("Error escribiendo la respuesta de error en formato JSON", e);
                         return Mono.error(e);
                     }
                 });

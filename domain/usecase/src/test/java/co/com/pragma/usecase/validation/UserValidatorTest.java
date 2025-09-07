@@ -7,18 +7,25 @@ import co.com.pragma.model.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDate;
 
-import static co.com.pragma.usecase.validation.ValidationConstants.*;
-import static org.mockito.Mockito.*;
+import static co.com.pragma.usecase.validation.ValidationConstants.EMAIL_ALREADY_EXISTS_MESSAGE;
+import static co.com.pragma.usecase.validation.ValidationConstants.MAX_BASE_SALARY;
+import static co.com.pragma.usecase.validation.ValidationConstants.MIN_BASE_SALARY;
+import static co.com.pragma.usecase.validation.ValidationConstants.ROLE_NOT_FOUND_MESSAGE;
+import static co.com.pragma.usecase.validation.ValidationConstants.SALARY_OUT_OF_RANGE_MESSAGE;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserValidatorTest {

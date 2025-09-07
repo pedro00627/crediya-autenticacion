@@ -1,5 +1,6 @@
 package co.com.pragma.r2dbc.helper;
 
+import co.com.pragma.model.log.gateways.LoggerPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,13 +22,14 @@ class ReactiveAdapterOperationsTest {
     private DummyRepository repository;
     private ObjectMapper mapper;
     private ReactiveAdapterOperations<DummyEntity, DummyData, String, DummyRepository> operations;
+    private LoggerPort logger;
 
     @BeforeEach
     void setUp() {
         repository = Mockito.mock(DummyRepository.class);
         mapper = Mockito.mock(ObjectMapper.class);
         operations = new ReactiveAdapterOperations<DummyEntity, DummyData, String, DummyRepository>(
-                repository, mapper, DummyEntity::toEntity) {
+                logger, repository, mapper, DummyEntity::toEntity) {
         };
     }
 

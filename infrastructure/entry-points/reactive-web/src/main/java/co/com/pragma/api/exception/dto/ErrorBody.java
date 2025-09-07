@@ -10,4 +10,5 @@ public record ErrorBody(
         String error,
         String message,
         Map<String, String> messages
-) {}
+) {
+}
