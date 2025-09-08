@@ -11,6 +11,7 @@ public record User(
         String identityDocument,
         String phone,
         Integer roleId,
-        Double baseSalary
+        Double baseSalary,
+        String password
 ) {
 }

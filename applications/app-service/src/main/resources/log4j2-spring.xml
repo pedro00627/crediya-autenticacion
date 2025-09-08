@@ -7,12 +7,12 @@
     <Appenders>
         <!-- Appender para la Consola con formato JSON estándar -->
         <Console name="Console" target="SYSTEM_OUT">
-            <JSONLayout compact="true" eventEol="true" />
+            <JSONLayout compact="true" eventEol="true"/>
         </Console>
 
         <!-- Appender para Archivo, escribirá en ./logs/log.log -->
         <File name="File" fileName="${LOG_PATH}/log.log">
-            <JSONLayout compact="true" eventEol="true" />
+            <JSONLayout compact="true" eventEol="true"/>
         </File>
     </Appenders>
 
