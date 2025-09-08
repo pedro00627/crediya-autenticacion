@@ -1,6 +1,7 @@
 package co.com.pragma.config;
 
 import co.com.pragma.model.role.repository.RoleRepository;
+import co.com.pragma.model.security.PasswordEncryptor;
 import co.com.pragma.model.user.repository.UserRepository;
 import co.com.pragma.usecase.user.UserUseCase;
 import co.com.pragma.usecase.validation.UserValidator;
@@ -15,7 +16,7 @@ public class UseCaseConfig {
     }
 
     @Bean
-    public UserUseCase userUseCase(UserRepository userRepository, UserValidator userValidator) {
-        return new UserUseCase(userRepository, userValidator);
+    public UserUseCase userUseCase(UserRepository userRepository, UserValidator userValidator, PasswordEncryptor passwordEncryptor) {
+        return new UserUseCase(userRepository, userValidator, passwordEncryptor);
     }
 }

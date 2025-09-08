@@ -63,7 +63,8 @@ class UserReactiveRepositoryAdapterTest {
                 "123456789",
                 "3001234567",
                 1,
-                50000.0
+                50000.0,
+                ""
         );
 
         userEntity = new UserEntity(
@@ -75,7 +76,8 @@ class UserReactiveRepositoryAdapterTest {
                 "123456789",
                 "3001234567",
                 1,
-                50000.0
+                50000.0,
+                ""
         );
     }
 

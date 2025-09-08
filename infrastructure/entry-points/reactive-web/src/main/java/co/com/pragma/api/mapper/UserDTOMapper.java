@@ -5,9 +5,11 @@ import co.com.pragma.api.dto.response.UserResponseRecord;
 import co.com.pragma.model.user.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserDTOMapper {
+    //@Mapping(target = "password", ignore = true)
     UserResponseRecord toResponse(User user);
 
     // El 'id' es generado por el sistema, no se provee en la petición, por lo que se ignora.

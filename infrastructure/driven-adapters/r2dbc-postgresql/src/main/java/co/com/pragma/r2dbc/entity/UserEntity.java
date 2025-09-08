@@ -35,4 +35,6 @@ public class UserEntity {
     private Integer roleId;
     @Column("salario_base")
     private Double baseSalary;
+    @Column("password")
+    private String password;
 }

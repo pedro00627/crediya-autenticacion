@@ -25,6 +25,8 @@ public record UserRequestRecord(
         @NotBlank(message = "El ID del rol no puede estar vacío")
         String roleId,
         @NotNull(message = "El salario base no puede ser nulo")
-        Double baseSalary
+        Double baseSalary,
+        @NotBlank(message = "La contraseña no puede estar vacía")
+        String password
 ) {
 }
