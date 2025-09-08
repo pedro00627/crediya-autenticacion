@@ -6,7 +6,11 @@ import co.com.pragma.model.user.User;
 import co.com.pragma.model.user.repository.UserRepository;
 import reactor.core.publisher.Mono;
 
-import static co.com.pragma.usecase.validation.ValidationConstants.*;
+import static co.com.pragma.usecase.validation.ValidationConstants.EMAIL_ALREADY_EXISTS_MESSAGE;
+import static co.com.pragma.usecase.validation.ValidationConstants.MAX_BASE_SALARY;
+import static co.com.pragma.usecase.validation.ValidationConstants.MIN_BASE_SALARY;
+import static co.com.pragma.usecase.validation.ValidationConstants.ROLE_NOT_FOUND_MESSAGE;
+import static co.com.pragma.usecase.validation.ValidationConstants.SALARY_OUT_OF_RANGE_MESSAGE;
 
 public class UserValidator {
 
@@ -19,26 +23,22 @@ public class UserValidator {
     }
 
     public Mono<User> validateUser(User user) {
-        // Ejecutar todas las validaciones en paralelo.
-        // Si alguna falla, el Mono resultante fallará.
         return Mono.when(
                         validateSalaryRange(user),
                         validateRoleExistence(user),
                         validateEmailUniqueness(user)
                 )
-                // Si todas las validaciones son exitosas, se emite el usuario original.
                 .then(Mono.just(user));
     }
 
     private Mono<Void> validateSalaryRange(User user) {
         if (user.baseSalary() >= MIN_BASE_SALARY && user.baseSalary() <= MAX_BASE_SALARY) {
-            return Mono.empty(); // Salario válido, el Mono se completa.
+            return Mono.empty();
         }
         return Mono.error(new BusinessException(SALARY_OUT_OF_RANGE_MESSAGE));
     }
 
     private Mono<Void> validateRoleExistence(User user) {
-        // Si no se provee un roleId, no se valida.
         if (user.roleId() == null) {
             return Mono.empty();
         }

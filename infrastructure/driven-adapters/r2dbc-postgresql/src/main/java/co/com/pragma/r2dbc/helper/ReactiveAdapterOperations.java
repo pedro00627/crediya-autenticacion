@@ -1,7 +1,6 @@
 package co.com.pragma.r2dbc.helper;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import co.com.pragma.model.log.gateways.LoggerPort;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.data.domain.Example;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
@@ -13,14 +12,15 @@ import java.lang.reflect.ParameterizedType;
 import java.util.function.Function;
 
 public abstract class ReactiveAdapterOperations<E, D, I, R extends ReactiveCrudRepository<D, I> & ReactiveQueryByExampleExecutor<D>> {
-    protected final Logger log = LogManager.getLogger(getClass());
+    private final LoggerPort logger;
     private final Class<D> dataClass;
     private final Function<D, E> toEntityFn;
     protected R repository;
     protected ObjectMapper mapper;
 
     @SuppressWarnings("unchecked")
-    protected ReactiveAdapterOperations(R repository, ObjectMapper mapper, Function<D, E> toEntityFn) {
+    protected ReactiveAdapterOperations(LoggerPort logger, R repository, ObjectMapper mapper, Function<D, E> toEntityFn) {
+        this.logger = logger;
         this.repository = repository;
         this.mapper = mapper;
         ParameterizedType genericSuperclass = (ParameterizedType) this.getClass().getGenericSuperclass();
@@ -37,7 +37,7 @@ public abstract class ReactiveAdapterOperations<E, D, I, R extends ReactiveCrudR
     }
 
     public Mono<E> saveUser(E entity) {
-        log.debug("Mapeando entidad a objeto de datos para guardar: {}", entity);
+        logger.debug("Mapeando entidad a objeto de datos para guardar: {}", entity);
         return saveData(toData(entity))
                 .map(this::toEntity);
     }
@@ -48,9 +48,9 @@ public abstract class ReactiveAdapterOperations<E, D, I, R extends ReactiveCrudR
     }
 
     protected Mono<D> saveData(D data) {
-        log.debug("Llamando a repository.save con datos: {}", data);
+        logger.debug("Llamando a repository.save con datos: {}", data);
         return repository.save(data)
-                .doOnError(err -> log.error("Error al guardar datos en el repositorio", err));
+                .doOnError(err -> logger.error("Error al guardar datos en el repositorio", err));
     }
 
     protected Flux<D> saveData(Flux<D> data) {
@@ -58,20 +58,20 @@ public abstract class ReactiveAdapterOperations<E, D, I, R extends ReactiveCrudR
     }
 
     public Mono<E> findById(I id) {
-        log.debug("Buscando por ID: {}", id);
+        logger.debug("Buscando por ID: {}", id);
         return repository.findById(id)
-                .doOnNext(data -> log.debug("Encontrado para ID {}: {}", id, data))
+                .doOnNext(data -> logger.debug("Encontrado para ID {}: {}", id, data))
                 .map(this::toEntity);
     }
 
     public Flux<E> findByExample(E entity) {
-        log.debug("Buscando por ejemplo: {}", entity);
+        logger.debug("Buscando por ejemplo: {}", entity);
         return repository.findAll(Example.of(toData(entity)))
                 .map(this::toEntity);
     }
 
     public Flux<E> findAll() {
-        log.debug("Buscando todas las entidades");
+        logger.debug("Buscando todas las entidades");
         return repository.findAll()
                 .map(this::toEntity);
     }

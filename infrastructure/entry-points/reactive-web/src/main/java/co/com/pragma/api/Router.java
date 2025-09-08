@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -16,15 +17,25 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 public class Router {
     @Bean
     @RouterOperations(
-            @RouterOperation(
-                    path = "/api/v1/usuarios",
-                    produces = {APPLICATION_JSON_VALUE},
-                    method = RequestMethod.POST,
-                    beanClass = Handler.class,
-                    beanMethod = "saveUseCase"
-            )
+            {
+                    @RouterOperation(
+                            path = "/api/v1/usuarios",
+                            produces = {APPLICATION_JSON_VALUE},
+                            method = RequestMethod.POST,
+                            beanClass = Handler.class,
+                            beanMethod = "saveUseCase"
+                    ),
+                    @RouterOperation(
+                            path = "/api/v1/usuarios",
+                            produces = {APPLICATION_JSON_VALUE},
+                            method = RequestMethod.GET,
+                            beanClass = Handler.class,
+                            beanMethod = "getUserByEmail"
+                    )
+            }
     )
     public RouterFunction<ServerResponse> userRoutes(Handler handler) {
-        return route(POST("/api/v1/usuarios"), handler::saveUseCase);
+        return route(POST("/api/v1/usuarios"), handler::saveUseCase)
+                .and(route(GET("/api/v1/usuarios"), handler::getUserByEmail));
     }
 }

@@ -14,9 +14,9 @@ import co.com.pragma.usecase.user.UserUseCase;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
 import jakarta.validation.Validator;
-import org.mockito.Mockito;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -26,6 +26,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.FilterType;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -35,7 +37,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@WebFluxTest(controllers = {})
+import co.com.pragma.model.log.gateways.LoggerPort;
+
+@WebFluxTest(controllers = {}, excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = GlobalExceptionHandler.class))
 @Import({
         Router.class,
         Handler.class,
@@ -48,36 +52,14 @@ import static org.mockito.Mockito.when;
 })
 class RouterRestTest {
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public UserUseCase userUseCase() {
-            return Mockito.mock(UserUseCase.class);
-        }
-
-        @Bean
-        public UserDTOMapper userDTOMapper() {
-            return Mockito.mock(UserDTOMapper.class);
-        }
-
-        @Bean
-        public Validator validator() {
-            return Mockito.mock(Validator.class);
-        }
-    }
-
     @Autowired
     private WebTestClient webTestClient;
-
     @Autowired
     private UserUseCase userUseCase;
-
     @Autowired
     private UserDTOMapper userDTOMapper;
-
     @Autowired
     private Validator validator;
-
     private UserRequestRecord userRequest;
     private User userModel;
 
@@ -177,5 +159,28 @@ class RouterRestTest {
                 .jsonPath("$.status").isEqualTo(409)
                 .jsonPath("$.error").isEqualTo("Business Rule Violation")
                 .jsonPath("$.message").isEqualTo(errorMessage);
+    }
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public UserUseCase userUseCase() {
+            return Mockito.mock(UserUseCase.class);
+        }
+
+        @Bean
+        public UserDTOMapper userDTOMapper() {
+            return Mockito.mock(UserDTOMapper.class);
+        }
+
+        @Bean
+        public Validator validator() {
+            return Mockito.mock(Validator.class);
+        }
+
+        @Bean
+        public LoggerPort loggerPort() {
+            return Mockito.mock(LoggerPort.class);
+        }
     }
 }

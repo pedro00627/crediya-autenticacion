@@ -10,14 +10,16 @@ import co.com.pragma.api.exception.strategy.ServerWebInputExceptionHandler;
 import co.com.pragma.api.mapper.UserDTOMapper;
 import co.com.pragma.usecase.user.UserUseCase;
 import jakarta.validation.Validator;
-import org.mockito.Mockito;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
+import co.com.pragma.model.log.gateways.LoggerPort;
 
 // @WebFluxTest is a slice test for the web layer. We import the configurations
 // and router/handler we want to test.
@@ -35,28 +37,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
         ConfigTest.TestConfig.class
 })
 class ConfigTest {
-
-    /**
-     * This nested static class provides mock beans for dependencies outside the web layer.
-     * This is the recommended replacement for the deprecated @MockBean.
-     */
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public UserUseCase userUseCase() {
-            return Mockito.mock(UserUseCase.class);
-        }
-
-        @Bean
-        public UserDTOMapper userDTOMapper() {
-            return Mockito.mock(UserDTOMapper.class);
-        }
-
-        @Bean
-        public Validator validator() {
-            return Mockito.mock(Validator.class);
-        }
-    }
 
     @Autowired
     private WebTestClient webTestClient;
@@ -79,4 +59,30 @@ class ConfigTest {
                 .expectHeader().valueEquals("Referrer-Policy", "strict-origin-when-cross-origin");
     }
 
+    /**
+     * This nested static class provides mock beans for dependencies outside the web layer.
+     * This is the recommended replacement for the deprecated @MockBean.
+     */
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public UserUseCase userUseCase() {
+            return Mockito.mock(UserUseCase.class);
+        }
+
+        @Bean
+        public UserDTOMapper userDTOMapper() {
+            return Mockito.mock(UserDTOMapper.class);
+        }
+
+        @Bean
+        public Validator validator() {
+            return Mockito.mock(Validator.class);
+        }
+
+        @Bean
+        public LoggerPort loggerPort() {
+            return Mockito.mock(LoggerPort.class);
+        }
+    }
 }

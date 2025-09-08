@@ -1,12 +1,30 @@
+configurations {
+    all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
+        exclude group: 'ch.qos.logback', module: 'logback-core'
+    }
+}
+
 dependencies {
     implementation project(':usecase')
     implementation project(':model')
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation project(':commonutils')
+    implementation('org.springframework.boot:spring-boot-starter-webflux') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+    }
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation "org.springdoc:springdoc-openapi-starter-webflux-ui:${springdocVersion}"
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-    implementation 'org.apache.logging.log4j:log4j-api'
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+
+    testImplementation(project(':app-service')) {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+    }
 }

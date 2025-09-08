@@ -20,4 +20,7 @@ public class UserUseCase {
                 .flatMap(userRepository::saveUser);
     }
 
+    public Mono<User> getUserByEmail(String email) {
+        return userRepository.getUserByEmail(email);
+    }
 }
