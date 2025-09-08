@@ -1,50 +1,30 @@
 apply plugin: 'org.springframework.boot'
 
-configurations {
-    configureEach {
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
-        exclude group: 'ch.qos.logback', module: 'logback-classic'
-        exclude group: 'ch.qos.logback', module: 'logback-core'
-        exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
-        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-        exclude group: 'log4j', module: 'log4j-jcl'
-    }
-}
-
 dependencies {
+    // Project dependencies
+    implementation project(':model')
     implementation project(':r2dbc-postgresql')
     implementation project(':reactive-web')
     implementation project(':usecase')
-    implementation project(':model')
 
-    testImplementation 'com.tngtech.archunit:archunit:1.4.1'
-
-
+    // Implementation dependencies
     implementation "org.reactivecommons.utils:object-mapper:${reactiveCommonsMapperVersion}"
-
-    testImplementation('org.springframework.boot:spring-boot-starter-webflux')
-    implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
-    implementation 'org.apache.logging.log4j:log4j-layout-template-json'
-    runtimeOnly('org.springframework.boot:spring-boot-devtools')
-
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
-    // Micrometer Tracing dependencies
     implementation 'io.micrometer:context-propagation:1.0.6'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+    implementation 'org.apache.logging.log4j:log4j-layout-template-json'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    runtimeOnly('org.springframework.boot:spring-boot-devtools')
+    // Runtime Only dependencies
+    runtimeOnly 'org.springframework.boot:spring-boot-devtools'
 
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-    }
+    // Test Implementation dependencies
     testImplementation "com.tngtech.archunit:archunit:${archunitVersion}"
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
-
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.register('explodedJar', Copy) {

@@ -1,30 +1,16 @@
-configurations {
-    all {
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
-        exclude group: 'ch.qos.logback', module: 'logback-classic'
-        exclude group: 'ch.qos.logback', module: 'logback-core'
-    }
-}
-
 dependencies {
-    implementation project(':usecase')
-    implementation project(':model')
-    implementation project(':commonutils')
-    implementation('org.springframework.boot:spring-boot-starter-webflux') {
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
-    }
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation "org.springdoc:springdoc-openapi-starter-webflux-ui:${springdocVersion}"
-    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
 
-    testImplementation(project(':app-service')) {
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
-    }
+    implementation project(':commonutils')
+    implementation project(':model')
+    implementation project(':usecase')
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation "org.springdoc:springdoc-openapi-starter-webflux-ui:${springdocVersion}"
+
+    testImplementation project(':app-service')
 }

@@ -1,10 +1,12 @@
 dependencies {
-    implementation project(':model')
-    implementation 'org.springframework:spring-context'
-    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
-    implementation 'org.postgresql:r2dbc-postgresql'
-    implementation "org.reactivecommons.utils:object-mapper-api:${reactiveCommonsMapperVersion}"
-    testImplementation "org.reactivecommons.utils:object-mapper:${reactiveCommonsMapperVersion}"
-    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+    implementation project(':model')
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    implementation "org.reactivecommons.utils:object-mapper-api:${reactiveCommonsMapperVersion}"
+    implementation 'org.postgresql:r2dbc-postgresql'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.springframework:spring-context'
+
+    testImplementation "org.reactivecommons.utils:object-mapper:${reactiveCommonsMapperVersion}"
 }
