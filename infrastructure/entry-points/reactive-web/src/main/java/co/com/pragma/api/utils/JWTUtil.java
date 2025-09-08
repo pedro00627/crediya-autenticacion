@@ -3,11 +3,11 @@ package co.com.pragma.api.utils;
 import co.com.pragma.api.config.JWTConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -20,18 +20,22 @@ public class JWTUtil {
         this.jwtConfig = jwtConfig;
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, List<String> roles) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put(JwtClaimsConstants.ROLES, roles);
         return createToken(claims, username);
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
+        final Date now = new Date();
+        final Date expiration = new Date(now.getTime() + jwtConfig.getJwtExpiration());
+
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + jwtConfig.getJwtExpiration()))
-                .signWith(jwtConfig.secretKey(), SignatureAlgorithm.HS256)
+                .issuedAt(now)
+                .expiration(expiration)
+                .signWith(jwtConfig.secretKey())
                 .compact();
     }
 
@@ -44,6 +48,11 @@ public class JWTUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
+    @SuppressWarnings("unchecked")
+    public List<String> extractRoles(String token) {
+        return extractClaim(token, claims -> claims.get(JwtClaimsConstants.ROLES, List.class));
+    }
+
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
@@ -54,7 +63,11 @@ public class JWTUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(jwtConfig.secretKey()).build().parseClaimsJws(token).getBody();
+        return Jwts.parser()
+                .verifyWith(jwtConfig.secretKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private Boolean isTokenExpired(String token) {

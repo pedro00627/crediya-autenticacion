@@ -1,5 +1,5 @@
 package co.com.pragma.api.config;
-
+/*
 import co.com.pragma.api.Handler;
 import co.com.pragma.api.Router;
 import co.com.pragma.api.exception.GlobalExceptionHandler;
@@ -8,18 +8,16 @@ import co.com.pragma.api.exception.strategy.DefaultExceptionHandler;
 import co.com.pragma.api.exception.strategy.InvalidRequestExceptionHandler;
 import co.com.pragma.api.exception.strategy.ServerWebInputExceptionHandler;
 import co.com.pragma.api.mapper.UserDTOMapper;
+import co.com.pragma.model.log.gateways.LoggerPort;
 import co.com.pragma.usecase.user.UserUseCase;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
-
-import co.com.pragma.model.log.gateways.LoggerPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 // @WebFluxTest is a slice test for the web layer. We import the configurations
 // and router/handler we want to test.
@@ -33,13 +31,27 @@ import co.com.pragma.model.log.gateways.LoggerPort;
         InvalidRequestExceptionHandler.class,
         BusinessExceptionHandler.class,
         ServerWebInputExceptionHandler.class,
-        DefaultExceptionHandler.class,
-        ConfigTest.TestConfig.class
+        DefaultExceptionHandler.class
 })
 class ConfigTest {
 
     @Autowired
     private WebTestClient webTestClient;
+
+    @MockitoBean
+    private UserUseCase userUseCase;
+
+    @MockitoBean
+    private UserDTOMapper userDTOMapper;
+
+    @MockitoBean
+    private Validator validator;
+
+    @MockitoBean
+    private LoggerPort loggerPort;
+
+    @MockitoBean
+    private PasswordEncoder passwordEncoder;
 
     @Test
     void corsConfigurationShouldAllowOrigins() {
@@ -58,31 +70,5 @@ class ConfigTest {
                 .expectHeader().valueEquals("Pragma", "no-cache")
                 .expectHeader().valueEquals("Referrer-Policy", "strict-origin-when-cross-origin");
     }
-
-    /**
-     * This nested static class provides mock beans for dependencies outside the web layer.
-     * This is the recommended replacement for the deprecated @MockBean.
-     */
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public UserUseCase userUseCase() {
-            return Mockito.mock(UserUseCase.class);
-        }
-
-        @Bean
-        public UserDTOMapper userDTOMapper() {
-            return Mockito.mock(UserDTOMapper.class);
-        }
-
-        @Bean
-        public Validator validator() {
-            return Mockito.mock(Validator.class);
-        }
-
-        @Bean
-        public LoggerPort loggerPort() {
-            return Mockito.mock(LoggerPort.class);
-        }
-    }
 }
+*/

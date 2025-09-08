@@ -9,7 +9,6 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserDTOMapper {
-    //@Mapping(target = "password", ignore = true)
     UserResponseRecord toResponse(User user);
 
     // El 'id' es generado por el sistema, no se provee en la petición, por lo que se ignora.

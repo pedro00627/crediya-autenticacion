@@ -22,3 +22,10 @@ dependencies {
 
     testImplementation project(':app-service')
 }
+
+sourceSets {
+    test {
+        compileClasspath += project(':app-service').sourceSets.main.output
+        runtimeClasspath += project(':app-service').sourceSets.main.output
+    }
+}

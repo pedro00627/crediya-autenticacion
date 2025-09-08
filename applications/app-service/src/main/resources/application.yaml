@@ -37,4 +37,4 @@ logging:
   config: classpath:log4j2-spring.xml
 jwt:
   secret: "your-secret-key-that-is-at-least-256-bits-long"
-  expiration: 3600000000 # 1 hour in milliseconds
+  expiration: 3600000 # 1 hour in milliseconds

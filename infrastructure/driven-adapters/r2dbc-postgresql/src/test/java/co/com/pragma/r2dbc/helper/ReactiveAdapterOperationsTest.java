@@ -19,25 +19,24 @@ import reactor.test.StepVerifier;
 import java.util.Objects;
 import java.util.function.Function;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.eq;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ReactiveAdapterOperationsTest {
 
     private DummyRepository repository;
     private ObjectMapper mapper;
-    private LoggerPort logger;
 
     private ReactiveAdapterOperations<DummyEntity, DummyData, String, DummyRepository> operations;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp()  {
         repository = Mockito.mock(DummyRepository.class);
         mapper = Mockito.mock(ObjectMapper.class);
-        logger = Mockito.mock(LoggerPort.class);
+        LoggerPort logger = Mockito.mock(LoggerPort.class);
 
         assertNotNull(logger, "LoggerPort mock should not be null after explicit creation");
 
@@ -68,10 +67,10 @@ class ReactiveAdapterOperationsTest {
 
         // Cambiar este stubbing para manejar múltiples llamadas secuenciales
         when(mapper.map(any(DummyEntity.class), eq(DummyData.class)))
-            .thenAnswer(invocation -> {
-                DummyEntity entity = invocation.getArgument(0);
-                return new DummyData(entity.getId(), entity.getName());
-            });
+                .thenAnswer(invocation -> {
+                    DummyEntity entity = invocation.getArgument(0);
+                    return new DummyData(entity.getId(), entity.getName());
+                });
 
         when(repository.saveAll(any(Flux.class))).thenReturn(Flux.just(data1, data2));
 

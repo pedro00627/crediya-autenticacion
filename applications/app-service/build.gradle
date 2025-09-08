@@ -1,7 +1,7 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
-	testImplementation 'com.tngtech.archunit:archunit:1.4.1'
+    testImplementation 'com.tngtech.archunit:archunit:1.4.1'
     // Project dependencies
     implementation project(':model')
     implementation project(':r2dbc-postgresql')

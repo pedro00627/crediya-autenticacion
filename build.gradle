@@ -10,7 +10,7 @@ buildscript {
         springdocVersion = '2.5.0'
         reactiveCommonsMapperVersion = '0.1.0'
         archunitVersion = '1.4.1'
-        jjwtVersion = '0.12.5'
+        jjwtVersion = '0.12.6'
     }
 }
 

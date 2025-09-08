@@ -77,7 +77,7 @@ class UserValidatorTest {
         // Arrange
         User userWithInvalidSalary = new User(
                 null, "Jane", "Doe", LocalDate.now(), "jane.doe@example.com",
-                "987654321", "3109876543", 2, MAX_BASE_SALARY + 1,""
+                "987654321", "3109876543", 2, MAX_BASE_SALARY + 1, ""
         );
 
         // Stub other parallel validations to ensure they don't fail with NPE
@@ -131,7 +131,7 @@ class UserValidatorTest {
         // Arrange
         User userWithNullRole = new User(
                 null, "Sam", "Smith", LocalDate.now(), "sam.smith@example.com",
-                "555555555", "3205555555", null, 100000.0,""
+                "555555555", "3205555555", null, 100000.0, ""
         );
         when(userRepository.existByEmail(userWithNullRole.email())).thenReturn(Mono.just(false));
 
@@ -152,7 +152,7 @@ class UserValidatorTest {
         // Arrange
         User userWithNegativeSalary = new User(
                 null, "Negative", "Salary", LocalDate.now(), "negative.salary@example.com",
-                "111222333", "3001112222", 3, -100.0,""
+                "111222333", "3001112222", 3, -100.0, ""
         );
 
         // Stub other parallel validations to ensure they don't fail with NPE
@@ -173,7 +173,7 @@ class UserValidatorTest {
     @ValueSource(doubles = {MIN_BASE_SALARY, MAX_BASE_SALARY})
     void validateUserShouldSucceedWhenSalaryIsOnBoundaries(double boundarySalary) {
         // Arrange
-        User userWithBoundarySalary = new User(null, "Boundary", "Test", LocalDate.now(), "boundary@example.com", "444555666", "3154445555", 1, boundarySalary,"");
+        User userWithBoundarySalary = new User(null, "Boundary", "Test", LocalDate.now(), "boundary@example.com", "444555666", "3154445555", 1, boundarySalary, "");
         when(userRepository.existByEmail(userWithBoundarySalary.email())).thenReturn(Mono.just(false));
         when(roleRepository.existsById(userWithBoundarySalary.roleId())).thenReturn(Mono.just(true));
 

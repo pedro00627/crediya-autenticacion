@@ -1,9 +1,9 @@
 package co.com.pragma.usecase.user;
 
+import co.com.pragma.model.security.PasswordEncryptor;
 import co.com.pragma.model.user.User;
 import co.com.pragma.model.user.repository.UserRepository;
 import co.com.pragma.usecase.validation.UserValidator;
-import co.com.pragma.model.security.PasswordEncryptor;
 import reactor.core.publisher.Mono;
 
 public class UserUseCase {
