@@ -26,6 +26,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.FilterType;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -35,7 +37,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@WebFluxTest(controllers = {})
+import co.com.pragma.model.log.gateways.LoggerPort;
+
+@WebFluxTest(controllers = {}, excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = GlobalExceptionHandler.class))
 @Import({
         Router.class,
         Handler.class,
@@ -172,6 +176,11 @@ class RouterRestTest {
         @Bean
         public Validator validator() {
             return Mockito.mock(Validator.class);
+        }
+
+        @Bean
+        public LoggerPort loggerPort() {
+            return Mockito.mock(LoggerPort.class);
         }
     }
 }

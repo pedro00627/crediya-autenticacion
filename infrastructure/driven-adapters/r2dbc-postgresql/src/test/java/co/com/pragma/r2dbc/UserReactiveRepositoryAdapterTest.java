@@ -1,5 +1,6 @@
 package co.com.pragma.r2dbc;
 
+import co.com.pragma.model.log.gateways.LoggerPort;
 import co.com.pragma.model.user.User;
 import co.com.pragma.r2dbc.entity.UserEntity;
 import co.com.pragma.r2dbc.interfaces.UserReactiveRepository;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UserReactiveRepositoryAdapterTest {
 
-    @InjectMocks
+    // Eliminar @InjectMocks de aquí
     UserReactiveRepositoryAdapter repositoryAdapter;
 
     @Mock
@@ -41,11 +42,17 @@ class UserReactiveRepositoryAdapterTest {
     @Mock
     TransactionalOperator transactionalOperator;
 
+    @Mock
+    LoggerPort logger;
+
     private User user;
     private UserEntity userEntity;
 
     @BeforeEach
     void setUp() {
+        // Inicializar repositoryAdapter manualmente, pasando todos los mocks
+        repositoryAdapter = new UserReactiveRepositoryAdapter(repository, mapper, logger, transactionalOperator, userDataMapper);
+
         // Se crean objetos de ejemplo para usar en todos los tests
         user = new User(
                 "1",

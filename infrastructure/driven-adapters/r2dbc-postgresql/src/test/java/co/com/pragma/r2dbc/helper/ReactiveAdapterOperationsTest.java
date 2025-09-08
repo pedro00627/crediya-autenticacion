@@ -3,7 +3,11 @@ package co.com.pragma.r2dbc.helper;
 import co.com.pragma.model.log.gateways.LoggerPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.data.domain.Example;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
@@ -13,24 +17,32 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.eq;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@ExtendWith(MockitoExtension.class)
 class ReactiveAdapterOperationsTest {
 
     private DummyRepository repository;
     private ObjectMapper mapper;
-    private ReactiveAdapterOperations<DummyEntity, DummyData, String, DummyRepository> operations;
     private LoggerPort logger;
 
+    private ReactiveAdapterOperations<DummyEntity, DummyData, String, DummyRepository> operations;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         repository = Mockito.mock(DummyRepository.class);
         mapper = Mockito.mock(ObjectMapper.class);
-        operations = new ReactiveAdapterOperations<DummyEntity, DummyData, String, DummyRepository>(
-                logger, repository, mapper, DummyEntity::toEntity) {
-        };
+        logger = Mockito.mock(LoggerPort.class);
+
+        assertNotNull(logger, "LoggerPort mock should not be null after explicit creation");
+
+        operations = new TestReactiveAdapterOperations(
+                logger, repository, mapper, DummyEntity::toEntity);
     }
 
     @Test
@@ -47,14 +59,20 @@ class ReactiveAdapterOperationsTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     void saveAllEntities() {
         DummyEntity entity1 = new DummyEntity("1", "test1");
         DummyEntity entity2 = new DummyEntity("2", "test2");
         DummyData data1 = new DummyData("1", "test1");
         DummyData data2 = new DummyData("2", "test2");
 
-        when(mapper.map(entity1, DummyData.class)).thenReturn(data1);
-        when(mapper.map(entity2, DummyData.class)).thenReturn(data2);
+        // Cambiar este stubbing para manejar múltiples llamadas secuenciales
+        when(mapper.map(any(DummyEntity.class), eq(DummyData.class)))
+            .thenAnswer(invocation -> {
+                DummyEntity entity = invocation.getArgument(0);
+                return new DummyData(entity.getId(), entity.getName());
+            });
+
         when(repository.saveAll(any(Flux.class))).thenReturn(Flux.just(data1, data2));
 
         StepVerifier.create(operations.saveAllEntities(Flux.just(entity1, entity2)))
@@ -102,6 +120,12 @@ class ReactiveAdapterOperationsTest {
     }
 
     interface DummyRepository extends ReactiveCrudRepository<DummyData, String>, ReactiveQueryByExampleExecutor<DummyData> {
+    }
+
+    static class TestReactiveAdapterOperations extends ReactiveAdapterOperations<DummyEntity, DummyData, String, DummyRepository> {
+        public TestReactiveAdapterOperations(LoggerPort logger, DummyRepository repository, ObjectMapper mapper, Function<DummyData, DummyEntity> toEntityFn) {
+            super(logger, repository, mapper, toEntityFn);
+        }
     }
 
     static class DummyEntity {

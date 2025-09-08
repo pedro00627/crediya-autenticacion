@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import co.com.pragma.model.log.gateways.LoggerPort;
+
 // @WebFluxTest is a slice test for the web layer. We import the configurations
 // and router/handler we want to test.
 @WebFluxTest(controllers = {}) // We specify no controllers to avoid component scanning
@@ -77,6 +79,10 @@ class ConfigTest {
         public Validator validator() {
             return Mockito.mock(Validator.class);
         }
-    }
 
+        @Bean
+        public LoggerPort loggerPort() {
+            return Mockito.mock(LoggerPort.class);
+        }
+    }
 }
