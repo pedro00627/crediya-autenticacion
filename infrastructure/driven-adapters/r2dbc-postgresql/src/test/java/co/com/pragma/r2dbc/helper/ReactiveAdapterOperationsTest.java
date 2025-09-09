@@ -33,7 +33,7 @@ class ReactiveAdapterOperationsTest {
     private ReactiveAdapterOperations<DummyEntity, DummyData, String, DummyRepository> operations;
 
     @BeforeEach
-    void setUp()  {
+    void setUp() {
         repository = Mockito.mock(DummyRepository.class);
         mapper = Mockito.mock(ObjectMapper.class);
         LoggerPort logger = Mockito.mock(LoggerPort.class);

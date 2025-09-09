@@ -2,6 +2,9 @@ package co.com.pragma.commonutils;
 
 import java.util.regex.Pattern;
 
+/**
+ * Clase de utilidad para operaciones relacionadas con logging.
+ */
 public final class LogHelper {
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[a-zA-Z0-9_+&*-]++(?:\\.[a-zA-Z0-9_+&*-]++)*+@(?:[a-zA-Z0-9-]++\\.)++[a-zA-Z]{2,7}$");
