@@ -5,8 +5,6 @@ import co.com.pragma.api.exception.dto.ErrorBody;
 import co.com.pragma.api.exception.dto.ErrorResponseWrapper;
 import co.com.pragma.model.log.gateways.LoggerPort;
 import jakarta.validation.ConstraintViolation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;

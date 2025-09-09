@@ -9,7 +9,6 @@ import co.com.pragma.r2dbc.repository.UserReactiveRepositoryAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.utils.ObjectMapper;
@@ -63,7 +62,8 @@ class UserReactiveRepositoryAdapterTest {
                 "123456789",
                 "3001234567",
                 1,
-                50000.0
+                50000.0,
+                ""
         );
 
         userEntity = new UserEntity(
@@ -75,7 +75,8 @@ class UserReactiveRepositoryAdapterTest {
                 "123456789",
                 "3001234567",
                 1,
-                50000.0
+                50000.0,
+                ""
         );
     }
 

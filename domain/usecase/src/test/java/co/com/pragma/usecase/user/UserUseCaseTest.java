@@ -1,6 +1,7 @@
 package co.com.pragma.usecase.user;
 
 import co.com.pragma.model.exception.BusinessException;
+import co.com.pragma.model.security.PasswordEncryptor;
 import co.com.pragma.model.user.User;
 import co.com.pragma.model.user.repository.UserRepository;
 import co.com.pragma.usecase.validation.UserValidator;
@@ -28,6 +29,10 @@ class UserUseCaseTest {
     @Mock
     private UserValidator userValidator;
 
+    @Mock
+    private PasswordEncryptor passwordEncryptor;
+
+
     @InjectMocks
     private UserUseCase userUseCase;
 
@@ -44,14 +49,26 @@ class UserUseCaseTest {
                 "123456789",
                 "3001234567",
                 1,
-                50000.0
+                50000.0,
+                null
         );
     }
 
     @Test
     void saveUserShouldSucceedWhenValidationPasses() {
         // Arrange
-        User savedUser = new User("id-123", user.firstName(), user.lastName(), user.birthDate(), user.email(), user.identityDocument(), user.phone(), user.roleId(), user.baseSalary());
+        User savedUser = new User(
+                "id-123",
+                user.firstName(),
+                user.lastName(),
+                user.birthDate(),
+                user.email(),
+                user.identityDocument(),
+                user.phone(),
+                user.roleId(),
+                user.baseSalary(),
+                user.password()
+        );
         when(userValidator.validateUser(any(User.class))).thenReturn(Mono.just(user));
         when(userRepository.saveUser(any(User.class))).thenReturn(Mono.just(savedUser));
 

@@ -9,6 +9,8 @@ import co.com.pragma.api.exception.strategy.InvalidRequestExceptionHandler;
 import co.com.pragma.api.exception.strategy.ServerWebInputExceptionHandler;
 import co.com.pragma.api.mapper.UserDTOMapper;
 import co.com.pragma.model.exception.BusinessException;
+import co.com.pragma.model.log.gateways.LoggerPort;
+import co.com.pragma.model.security.PasswordEncryptor;
 import co.com.pragma.model.user.User;
 import co.com.pragma.usecase.user.UserUseCase;
 import jakarta.validation.ConstraintViolation;
@@ -16,18 +18,19 @@ import jakarta.validation.Path;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
-import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.context.annotation.FilterType;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -37,9 +40,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import co.com.pragma.model.log.gateways.LoggerPort;
-
-@WebFluxTest(controllers = {}, excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = GlobalExceptionHandler.class))
+@ExtendWith(SpringExtension.class)
+@WebFluxTest(excludeAutoConfiguration = {
+        SecurityAutoConfiguration.class,
+        ReactiveSecurityAutoConfiguration.class
+})
 @Import({
         Router.class,
         Handler.class,
@@ -48,18 +53,24 @@ import co.com.pragma.model.log.gateways.LoggerPort;
         BusinessExceptionHandler.class,
         ServerWebInputExceptionHandler.class,
         DefaultExceptionHandler.class,
-        RouterRestTest.TestConfig.class
+        RouterRestTest.TestApplication.class
 })
 class RouterRestTest {
 
     @Autowired
     private WebTestClient webTestClient;
-    @Autowired
+
+    @MockitoBean
     private UserUseCase userUseCase;
-    @Autowired
+    @MockitoBean
     private UserDTOMapper userDTOMapper;
-    @Autowired
+    @MockitoBean
     private Validator validator;
+    @MockitoBean
+    private LoggerPort loggerPort;
+    @MockitoBean
+    private PasswordEncryptor passwordEncryptor;
+
     private UserRequestRecord userRequest;
     private User userModel;
 
@@ -73,11 +84,12 @@ class RouterRestTest {
                 "123456789",
                 "3001234567",
                 "1",
-                50000.0
+                50000.0,
+                "testpassword"
         );
 
         userModel = new User(
-                null, // ID es nulo antes de guardar
+                "dummy-id",
                 "John",
                 "Doe",
                 LocalDate.of(1990, 5, 15),
@@ -85,23 +97,22 @@ class RouterRestTest {
                 "123456789",
                 "3001234567",
                 1,
-                50000.0
+                50000.0,
+                "testpassword"
         );
     }
 
     @Test
     void saveUserShouldSucceed() {
-        // Arrange
-        User savedUser = new User("gen-id-123", userModel.firstName(), userModel.lastName(), userModel.birthDate(), userModel.email(), userModel.identityDocument(), userModel.phone(), userModel.roleId(), userModel.baseSalary());
+        User savedUser = new User("gen-id-123", userModel.firstName(), userModel.lastName(), userModel.birthDate(), userModel.email(), userModel.identityDocument(), userModel.phone(), userModel.roleId(), userModel.baseSalary(),"encryptedPassword");
         UserResponseRecord response = new UserResponseRecord("gen-id-123", "John", "Doe", LocalDate.of(1990, 5, 15), "john.doe@example.com", "123456789", "3001234567", "1", 50000.0);
 
-        // Mocking de la cadena de ejecución exitosa
         when(validator.validate(any(UserRequestRecord.class))).thenReturn(Collections.emptySet());
         when(userDTOMapper.toModel(any(UserRequestRecord.class))).thenReturn(userModel);
+        when(passwordEncryptor.encode(any(String.class))).thenReturn("encryptedPassword");
         when(userUseCase.saveUser(any(User.class))).thenReturn(Mono.just(savedUser));
         when(userDTOMapper.toResponse(any(User.class))).thenReturn(response);
 
-        // Act & Assert
         webTestClient.post()
                 .uri("/api/v1/usuarios")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -113,9 +124,9 @@ class RouterRestTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void saveUserShouldFailOnInvalidRequest() {
-        // Arrange: Simular una violación de validación
-        UserRequestRecord invalidRequest = new UserRequestRecord(null, "Doe", LocalDate.now(), "email", "doc", "phone", "1", 1.0);
+        UserRequestRecord invalidRequest = new UserRequestRecord(null, "Doe", LocalDate.now(), "email", "doc", "phone", "1", 1.0,"");
 
         ConstraintViolation<UserRequestRecord> violation = mock(ConstraintViolation.class);
         Path propertyPath = mock(Path.class);
@@ -126,7 +137,6 @@ class RouterRestTest {
         Set<ConstraintViolation<UserRequestRecord>> violations = Set.of(violation);
         when(validator.validate(any(UserRequestRecord.class))).thenReturn(violations);
 
-        // Act & Assert
         webTestClient.post()
                 .uri("/api/v1/usuarios")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -141,46 +151,25 @@ class RouterRestTest {
 
     @Test
     void saveUserShouldFailOnBusinessException() {
-        // Arrange: Simular una excepción de negocio (ej. email duplicado)
         String errorMessage = "El correo electrónico 'john.doe@example.com' ya se encuentra registrado.";
 
         when(validator.validate(any(UserRequestRecord.class))).thenReturn(Collections.emptySet());
         when(userDTOMapper.toModel(any(UserRequestRecord.class))).thenReturn(userModel);
         when(userUseCase.saveUser(any(User.class))).thenReturn(Mono.error(new BusinessException(errorMessage)));
 
-        // Act & Assert
         webTestClient.post()
                 .uri("/api/v1/usuarios")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(userRequest)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.CONFLICT) // 409
+                .expectStatus().isEqualTo(HttpStatus.CONFLICT)
                 .expectBody()
                 .jsonPath("$.status").isEqualTo(409)
                 .jsonPath("$.error").isEqualTo("Business Rule Violation")
                 .jsonPath("$.message").isEqualTo(errorMessage);
     }
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public UserUseCase userUseCase() {
-            return Mockito.mock(UserUseCase.class);
-        }
-
-        @Bean
-        public UserDTOMapper userDTOMapper() {
-            return Mockito.mock(UserDTOMapper.class);
-        }
-
-        @Bean
-        public Validator validator() {
-            return Mockito.mock(Validator.class);
-        }
-
-        @Bean
-        public LoggerPort loggerPort() {
-            return Mockito.mock(LoggerPort.class);
-        }
+    @SpringBootConfiguration
+    static class TestApplication {
     }
 }

@@ -1,0 +1,3 @@
+jwt:
+  secret: "test-secret-key-for-testing-environment-only-1234567890"
+  expiration: 3600000 # 1 hour in milliseconds for tests
