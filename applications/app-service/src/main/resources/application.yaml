@@ -5,10 +5,20 @@ spring:
     name: "Autenticacion"
   devtools:
     add-properties: false
-  h2:
-    console:
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/crediya
+    username: ${DB_USER}
+    password: ${DB_SECRET}
+    properties:
+      schema: autenticacion
+    pool:
       enabled: true
-      path: "/h2"
+      initial-size: 5
+      max-size: 10
+      max-idle-time: 30m
+      connect-timeout: 5s
+
   profiles:
     include: null
 management:
@@ -25,14 +35,6 @@ management:
       probability: 1.0
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
-adapters:
-  r2dbc:
-    host: localhost
-    port: 5432
-    database: crediya
-    schema: autenticacion
-    username: postgres
-    password: P1o2s3G4.
 logging:
   config: classpath:log4j2-spring.xml
 jwt:
