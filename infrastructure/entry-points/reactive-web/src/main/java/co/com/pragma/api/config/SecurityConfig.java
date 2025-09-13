@@ -43,6 +43,8 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(PUBLIC_API_PATHS).permitAll()
+                        // Regla para el endpoint POST de usuarios
+                        .pathMatchers(HttpMethod.POST, "/api/v1/usuarios").hasAnyRole(RoleConstants.ADMIN, RoleConstants.ADVISOR)
                         // Reglas de la historia de usuario
                         .pathMatchers(HttpMethod.POST, "/api/users").hasAnyRole(RoleConstants.ADMIN, RoleConstants.ADVISOR)
                         .pathMatchers(HttpMethod.POST, "/api/loans").hasRole(RoleConstants.CLIENT)
