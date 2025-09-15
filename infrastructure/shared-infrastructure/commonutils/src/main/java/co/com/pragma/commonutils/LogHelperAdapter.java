@@ -1,29 +1,29 @@
-package co.com.pragma.api.log;
+package co.com.pragma.commonutils;
 
-import com.github.pedro00627.commonlogging.LogHelper;
 import co.com.pragma.model.log.gateways.LoggerPort;
+import com.github.pedro00627.commonlogging.LogHelper;
 
-public class Slf4jLoggerAdapter implements LoggerPort {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Slf4jLoggerAdapter.class);
+
+public class LogHelperAdapter implements LoggerPort {
 
     @Override
     public void info(String message, Object... args) {
-        log.info(message, args);
+        LogHelper.info(message, args);
     }
 
     @Override
     public void warn(String message, Object... args) {
-        log.warn(message, args);
+        LogHelper.warn(message, args);
     }
 
     @Override
     public void debug(String message, Object... args) {
-        log.debug(message, args);
+        LogHelper.debug(message, args);
     }
 
     @Override
     public void error(String message, Throwable throwable) {
-        log.error(message, throwable);
+        LogHelper.error(message, throwable);
     }
 
     @Override

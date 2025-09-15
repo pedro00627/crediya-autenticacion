@@ -1,5 +1,5 @@
 # === Etapa 1: Construcción (Build Stage) ===
-FROM gradle:8.5.0-jdk17-jammy AS build
+FROM gradle:9.0.0-jdk21-jammy AS build
 WORKDIR /home/gradle/src
 
 COPY build.gradle settings.gradle gradlew ./
@@ -12,7 +12,7 @@ COPY src ./src
 RUN ./gradlew bootJar --no-daemon -x test
 
 # === Etapa 2: Ejecución (Runtime Stage) ===
-FROM gcr.io/distroless/java17-debian11
+FROM gcr.io/distroless/java21-debian11
 WORKDIR /app
 
 # Asumimos que el JAR generado se llama 'Autenticacion.jar' y está en una ruta similar

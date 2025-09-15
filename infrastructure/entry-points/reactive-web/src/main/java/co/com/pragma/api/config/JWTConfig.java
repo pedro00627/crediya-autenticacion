@@ -11,11 +11,15 @@ import java.nio.charset.StandardCharsets;
 @Configuration
 public class JWTConfig {
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
 
-    @Value("${jwt.expiration}")
-    private long jwtExpiration;
+    private final String jwtSecret;
+    private final long jwtExpiration;
+
+    public JWTConfig(@Value("${jwt.secret}") String jwtSecret,
+                     @Value("${jwt.expiration}") Long jwtExpiration) {
+        this.jwtSecret = jwtSecret;
+        this.jwtExpiration = jwtExpiration;
+    }
 
     @Bean
     public SecretKey secretKey() {

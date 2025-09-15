@@ -1,17 +1,14 @@
 dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
-    implementation project(':commonutils')
     implementation project(':model')
     implementation project(':usecase')
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation "org.springdoc:springdoc-openapi-starter-webflux-ui:${springdocVersion}"
-
     // Spring Security for WebFlux
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
@@ -20,6 +17,8 @@ dependencies {
     runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
     runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
 
+    // Dependencia a la librería common-logging
+    implementation "com.github.pedro00627:common-logging:${loggingVersion}"
     testImplementation project(':app-service')
 }
 

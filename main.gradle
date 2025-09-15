@@ -17,30 +17,52 @@ subprojects {
     compileJava.dependsOn validateStructure
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
-
-    //build.dependsOn 'pitest'
 
     test {
         useJUnitPlatform()
     }
 
-    dependencies {
-        implementation 'io.projectreactor:reactor-core'
-        implementation 'io.projectreactor.addons:reactor-extra'
+    // SOLO aplicar estas dependencias a módulos QUE NO SEAN DE DOMINIO
+    if (!project.path.contains(':model') && !project.path.contains(':usecase')) {
+        dependencies {
+            implementation 'io.projectreactor:reactor-core'
+            implementation 'io.projectreactor.addons:reactor-extra'
+            implementation "com.github.pedro00627:common-logging:${loggingVersion}"
+            implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
 
-        testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.13.RELEASE'
+            testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.13.RELEASE'
+            testImplementation 'io.projectreactor:reactor-test'
+            testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+            testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-        testImplementation 'io.projectreactor:reactor-test'
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        compileOnly "org.projectlombok:lombok:${lombokVersion}"
-        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-        testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
-        testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-        implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+            compileOnly "org.projectlombok:lombok:${lombokVersion}"
+            annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+            testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+            testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+        }
+    }
+
+    // Para módulos de dominio: dependencias mínimas + reactor-core para reactividad
+    if (project.path.contains(':model') || project.path.contains(':usecase')) {
+        dependencies {
+            // Platform necesario para resolver versiones
+            implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+
+            // Solo reactor-core para reactividad (sin dependencias de Spring)
+            implementation 'io.projectreactor:reactor-core'
+
+            compileOnly "org.projectlombok:lombok:${lombokVersion}"
+            annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+            testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+            testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+            testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+            testImplementation 'org.springframework.boot:spring-boot-starter-test'
+            testImplementation 'io.projectreactor:reactor-test'
+        }
     }
 
     tasks.withType(Test).configureEach {
@@ -64,7 +86,6 @@ subprojects {
         exportLineCoverage = true
         useClasspathFile = true
         timestampedReports = false
-        //mutators = ['STRONGER', 'DEFAULTS']
         fileExtensionsToFilter.addAll('xml', 'orbit')
         junit5PluginVersion = '1.2.2'
         failWhenNoMutations = false
@@ -80,7 +101,6 @@ subprojects {
             html.setOutputLocation layout.buildDirectory.dir("reports/jacocoHtml")
         }
     }
-
 }
 
 jacoco {
@@ -127,6 +147,9 @@ pitestReportAggregate {
     }
 }
 
-tasks.named('wrapper') {
-    gradleVersion = '8.14.3'
+// Tarea wrapper solo para el proyecto root
+if (project == rootProject) {
+    tasks.named('wrapper') {
+        gradleVersion = '8.14.3'
+    }
 }

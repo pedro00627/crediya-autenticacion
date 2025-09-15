@@ -1,0 +1,6 @@
+dependencies {
+    implementation project(':model')
+    implementation "com.github.pedro00627:common-logging:${loggingVersion}"
+    implementation 'org.springframework:spring-context'
+}
+
