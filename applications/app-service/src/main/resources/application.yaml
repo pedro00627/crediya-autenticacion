@@ -21,6 +21,12 @@ spring:
 
   profiles:
     include: null
+    active: prod
+logging:
+  config: classpath:log4j2-prod.yaml
+  level:
+    root: info
+    co.com.pragma: info
 management:
   endpoints:
     web:
@@ -28,15 +34,13 @@ management:
         include: "health,prometheus"
   endpoint:
     health:
-      probes:
+      probes: 
         enabled: true
   tracing:
     sampling:
       probability: 1.0
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
-logging:
-  config: classpath:profiles/web-service.yaml
 jwt:
   secret: "your-secret-key-that-is-at-least-256-bits-long"
   expiration: 3600000 # 1 hour in milliseconds

@@ -11,7 +11,7 @@ org.gradle.configuration-cache=true
 org.gradle.configuration-cache.parallel=true
 org.gradle.configuration-cache.integrity-check=true
 systemProp.sonar.gradle.skipCompile=true
-
+spring.profiles.active=dev
 # GitHub Packages credentials (REPLACE WITH YOUR ACTUAL VALUES)
 # NEVER COMMIT THESE VALUES TO GIT!
 # Copy this file to gradle.properties and replace with your actual credentials

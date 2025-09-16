@@ -2,8 +2,9 @@ package co.com.pragma.commonutils;
 
 import co.com.pragma.model.log.gateways.LoggerPort;
 import com.github.pedro00627.commonlogging.LogHelper;
+import org.springframework.stereotype.Component;
 
-
+@Component
 public class LogHelperAdapter implements LoggerPort {
 
     @Override

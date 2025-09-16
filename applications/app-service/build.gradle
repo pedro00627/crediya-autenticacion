@@ -12,12 +12,18 @@ dependencies {
     implementation "org.reactivecommons.utils:object-mapper:${reactiveCommonsMapperVersion}"
     implementation 'io.micrometer:context-propagation:1.0.6'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-    implementation 'org.springframework.boot:spring-boot-starter'
+    
+    // Exclude default logging and explicitly include Log4j2
+    implementation('org.springframework.boot:spring-boot-starter') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    implementation "org.springframework.boot:spring-boot-starter-log4j2:${springBootVersion}" // Explicitly add Log4j2 starter
+    implementation 'org.apache.logging.log4j:log4j-layout-template-json' // Added for JsonTemplateLayout
+
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation "com.github.pedro00627:common-logging:${loggingVersion}"
-    implementation 'org.apache.logging.log4j:log4j-layout-template-json'
 
     // Runtime Only dependencies
     runtimeOnly 'org.springframework.boot:spring-boot-devtools'
@@ -42,4 +48,9 @@ bootJar {
     // Sets output jar name
     archiveFileName = "${project.getParent().getName()}.${archiveExtension.get()}"
     mainClass = 'co.com.pragma.MainApplication'
+}
+
+bootRun {
+    systemProperties = System.properties as Map<String, ?>
+    systemProperties += [ 'spring.profiles.active': 'prod' ]
 }

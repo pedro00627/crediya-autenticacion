@@ -12,7 +12,7 @@ COPY src ./src
 RUN ./gradlew bootJar --no-daemon -x test
 
 # === Etapa 2: Ejecución (Runtime Stage) ===
-FROM gcr.io/distroless/java21-debian11
+FROM gcr.io/distroless/java21-debian12
 WORKDIR /app
 
 # Asumimos que el JAR generado se llama 'Autenticacion.jar' y está en una ruta similar

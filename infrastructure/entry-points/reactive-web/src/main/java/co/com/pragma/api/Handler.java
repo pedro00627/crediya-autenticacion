@@ -34,6 +34,7 @@ public class Handler implements UserApi {
 
     @Override
     public Mono<ServerResponse> saveUseCase(ServerRequest serverRequest) {
+        // ToDo mover logger al flujo reactivo para enmascarar el email
         logger.info("Recibida petición para guardar usuario en la ruta: {}", serverRequest.path());
         return serverRequest.bodyToMono(UserRequestRecord.class)
                 .switchIfEmpty(Mono.error(new ServerWebInputException("El cuerpo de la petición no puede estar vacío."))) // Handle empty body
@@ -50,7 +51,7 @@ public class Handler implements UserApi {
         // Extract email from query parameter, handle if absent
         return serverRequest.queryParam("email")
                 .map(email -> {
-                    logger.info("Recibida petición para obtener usuario por email: {}", email);
+                    logger.info("Recibida petición para obtener usuario por email: {}", logger.maskEmail(email));
                     return useCase.getUserByEmail(email)
                             .map(mapper::toResponse) // Use instance method reference
                             .flatMap(response -> ServerResponse.ok()

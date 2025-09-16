@@ -19,6 +19,7 @@ dependencies {
 
     // Dependencia a la librería common-logging
     implementation "com.github.pedro00627:common-logging:${loggingVersion}"
+
     testImplementation project(':app-service')
 }
 
