@@ -1,10 +1,23 @@
 apply plugin: 'info.solidsoft.pitest.aggregator'
 
+// Definición de commonVersion en el ámbito global para todos los proyectos
 allprojects {
+    ext {
+        commonVersion = '0.0.4'
+    }
+
     repositories {
         mavenCentral()
         maven { url = "https://repo.spring.io/snapshot" }
         maven { url = "https://repo.spring.io/milestone" }
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/pedro00627/crediya-common")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
     }
 }
 
@@ -30,7 +43,7 @@ subprojects {
         dependencies {
             implementation 'io.projectreactor:reactor-core'
             implementation 'io.projectreactor.addons:reactor-extra'
-            implementation "com.github.pedro00627:common-logging:${loggingVersion}"
+            implementation "co.com.pragma:crediya-common-starter:${commonVersion}"
             implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
 
             testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.13.RELEASE'
@@ -58,10 +71,6 @@ subprojects {
             annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
             testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
             testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-
-            testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-            testImplementation 'org.springframework.boot:spring-boot-starter-test'
-            testImplementation 'io.projectreactor:reactor-test'
         }
     }
 
@@ -136,8 +145,7 @@ pitestReportAggregate {
             subprojects.each { subproject ->
                 def xmlReport = subproject.layout.buildDirectory.file("reports/pitest/mutations.xml").get().asFile
                 if (xmlReport.exists()) {
-                    def xmlContent = xmlReport.text
-                    xmlContent = xmlContent.replaceAll("<\\?xml[^>]*>", "")
+                    def xmlContent = xmlContent.replaceAll("<\\?xml[^>]*>", "")
                     xmlContent = xmlContent.replaceAll("</?mutations( partial=\"true\")?>", "")
                     writer.write(xmlContent.trim() + "\n")
                 }

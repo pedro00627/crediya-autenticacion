@@ -1,6 +1,6 @@
 dependencies {
     implementation project(':model')
-    implementation "com.github.pedro00627:common-logging:${loggingVersion}"
+    implementation "co.com.pragma:crediya-common-starter:${commonVersion}"
     implementation 'org.springframework:spring-context'
 }
 

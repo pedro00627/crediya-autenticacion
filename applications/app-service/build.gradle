@@ -23,7 +23,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation "com.github.pedro00627:common-logging:${loggingVersion}"
+    implementation "co.com.pragma:crediya-common-starter:${commonVersion}"
 
     // Runtime Only dependencies
     runtimeOnly 'org.springframework.boot:spring-boot-devtools'

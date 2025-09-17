@@ -1,7 +1,7 @@
 package co.com.pragma.commonutils;
 
 import co.com.pragma.model.log.gateways.LoggerPort;
-import com.github.pedro00627.commonlogging.LogHelper;
+import co.com.pragma.commons.logging.LogHelper;
 import org.springframework.stereotype.Component;
 
 @Component
