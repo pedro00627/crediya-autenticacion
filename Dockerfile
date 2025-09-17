@@ -1,25 +1,29 @@
 # === Etapa 1: Construcción (Build Stage) ===
-FROM gradle:9.0.0-jdk21-jammy AS build
+FROM gradle:9.0.0-jdk21-jammy
 WORKDIR /home/gradle/src
 
+# Copiar archivos esenciales para el build
 COPY build.gradle settings.gradle gradlew ./
 COPY gradle ./gradle
 
-RUN ./gradlew build --no-daemon -x test || true
+# Asegurar permisos de ejecución para gradlew
+RUN chmod +x gradlew
 
+# Copiar el código fuente
 COPY src ./src
 
+# Construir el JAR sin ejecutar los tests
 RUN ./gradlew bootJar --no-daemon -x test
 
-# === Etapa 2: Ejecución (Runtime Stage) ===
+# === Etapa 2: Imagen final (Runtime Stage) ===
 FROM gcr.io/distroless/java21-debian12
 WORKDIR /app
 
-# Asumimos que el JAR generado se llama 'Autenticacion.jar' y está en una ruta similar
-COPY --from=build /home/gradle/src/applications/app-service/build/libs/Autenticacion.jar .
+# Copiar el JAR generado desde la etapa de construcción
+COPY --from=build /home/gradle/src/build/libs/*.jar ./app.jar
 
-# Exponemos el puerto 8081, que es el que definimos en docker-compose.yml
-EXPOSE 8081
+# Exponer el puerto de la aplicación
+EXPOSE 8080
 
-# El comando de inicio usa el nombre del JAR de este microservicio
+# Comando de inicio
 ENTRYPOINT ["java", "-jar", "Autenticacion.jar"]

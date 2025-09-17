@@ -4,9 +4,11 @@ import co.com.pragma.api.dto.request.UserRequestRecord;
 import co.com.pragma.api.exception.InvalidRequestException;
 import co.com.pragma.api.mapper.UserDTOMapper;
 import co.com.pragma.model.log.gateways.LoggerPort;
+import co.com.pragma.model.user.User;
 import co.com.pragma.usecase.user.UserUseCase;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -62,6 +64,21 @@ public class Handler implements UserApi {
                 .orElse(ServerResponse.badRequest() // Handle missing email parameter
                         .contentType(APPLICATION_JSON)
                         .bodyValue("{\"error\": \"El parámetro 'email' es requerido.\"}"));
+    }
+
+    @Override
+    public Mono<ServerResponse> getUserByEmailOrIdentityDocument(ServerRequest serverRequest) {
+        return Mono.just(serverRequest)
+                .filter(req -> req.queryParam("email").isPresent() || req.queryParam("identityDocument").isPresent())
+                .flatMap(req -> {
+                    String email = req.queryParam("email").orElse(null);
+                    String identityDocument = req.queryParam("identityDocument").orElse(null);
+                    return ServerResponse.ok()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(useCase.getUserByEmailOrIdentityDocument(email, identityDocument), User.class);
+                })
+                .switchIfEmpty(ServerResponse.badRequest()
+                        .bodyValue("{\"error\": \"Falta email o documento\"}"));
     }
 
     // This method validates the UserRequestRecord DTO for the save operation.

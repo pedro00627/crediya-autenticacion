@@ -10,6 +10,7 @@ import co.com.pragma.r2dbc.mapper.UserDataMapper;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -53,6 +54,11 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     public Mono<User> getUserByEmail(String email) {
         logger.debug("Buscando usuario por email en BD: {}", logger.maskEmail(email));
         return repository.findByEmail(email);
+    }
+
+    public Flux<User> getUserByEmailOrIdentityDocument(String email, String identityDocument) {
+        logger.debug("Buscando usuario por email o documento de identidad en BD: {} - {}", logger.maskEmail(email), identityDocument);
+        return repository.findByEmailOrIdentityDocument(email, identityDocument);
     }
 
 }

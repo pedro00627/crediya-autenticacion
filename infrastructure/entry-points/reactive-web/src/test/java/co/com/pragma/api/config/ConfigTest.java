@@ -1,5 +1,6 @@
 package co.com.pragma.api.config;
 
+import co.com.pragma.security.api.SecurityHeadersConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;

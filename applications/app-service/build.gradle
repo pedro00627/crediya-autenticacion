@@ -12,12 +12,13 @@ dependencies {
     implementation "org.reactivecommons.utils:object-mapper:${reactiveCommonsMapperVersion}"
     implementation 'io.micrometer:context-propagation:1.0.6'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-    
+
     // Exclude default logging and explicitly include Log4j2
     implementation('org.springframework.boot:spring-boot-starter') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
-    implementation "org.springframework.boot:spring-boot-starter-log4j2:${springBootVersion}" // Explicitly add Log4j2 starter
+    implementation "org.springframework.boot:spring-boot-starter-log4j2:${springBootVersion}"
+    // Explicitly add Log4j2 starter
     implementation 'org.apache.logging.log4j:log4j-layout-template-json' // Added for JsonTemplateLayout
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -52,5 +53,5 @@ bootJar {
 
 bootRun {
     systemProperties = System.properties as Map<String, ?>
-    systemProperties += [ 'spring.profiles.active': 'prod' ]
+    systemProperties += ['spring.profiles.active': 'prod']
 }

@@ -26,7 +26,8 @@ logging:
   config: classpath:log4j2-prod.yaml
   level:
     root: info
-    co.com.pragma: info
+    co.com.pragma: debug
+    org.springframework.security: debug # Added for Spring Security debug logs
 management:
   endpoints:
     web:
@@ -34,13 +35,30 @@ management:
         include: "health,prometheus"
   endpoint:
     health:
-      probes: 
+      probes:
         enabled: true
   tracing:
     sampling:
       probability: 1.0
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+
 jwt:
-  secret: "your-secret-key-that-is-at-least-256-bits-long"
+  secret: ${JWT_SECRET}
   expiration: 3600000 # 1 hour in milliseconds
+  excluded-paths:
+    - /api/v1/login
+    - /swagger-ui.html
+    - /swagger-ui/**
+    - /webjars/**
+    - /v3/api-docs/**
+
+security:
+  rules:
+    authorization:
+      - path: /api/v1/usuarios
+        method: POST
+        managerBeanName: postUserCreationAuthorizationManager
+      - path: /api/v1/usuarios
+        method: GET
+        managerBeanName: userAuthorizationManager

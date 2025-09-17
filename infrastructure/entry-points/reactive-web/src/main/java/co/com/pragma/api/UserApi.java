@@ -40,8 +40,24 @@ public interface UserApi {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "Usuario creado exitosamente", content = @Content(schema = @Schema(implementation = UserResponseRecord.class))),
-                    @ApiResponse(responseCode = "204", description = "Petición inválida (ej. datos faltantes, formato incorrecto)", content = @Content(schema = @Schema(implementation = ErrorBody.class)))
+                    @ApiResponse(responseCode = "400", description = "Petición inválida (ej. datos faltantes, formato incorrecto)", content = @Content(schema = @Schema(implementation = ErrorBody.class))),
+                    @ApiResponse(responseCode = "404", description = "Usuario o Documento no encontrados", content = @Content(schema = @Schema(implementation = ErrorBody.class)))
             }
     )
     Mono<ServerResponse> getUserByEmail(ServerRequest serverRequest);
+
+    @Operation(
+            operationId = "obtener un usuario por email o documento de identidad",
+            summary = "Consultar un usuario por email o documento de identidad",
+            description = "Consultar un usuario en el sistema por email o documento",
+            parameters = {
+                    @Parameter(name = "email", description = "Email del usuario a buscar.", required = true, in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY),
+                    @Parameter(name = "identityDocument", description = "Email del usuario a buscar.", required = true, in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Usuario creado exitosamente", content = @Content(schema = @Schema(implementation = UserResponseRecord.class))),
+                    @ApiResponse(responseCode = "400", description = "Petición inválida (ej. datos faltantes, formato incorrecto)", content = @Content(schema = @Schema(implementation = ErrorBody.class))),
+                    @ApiResponse(responseCode = "404", description = "Usuario o Documento no encontrados", content = @Content(schema = @Schema(implementation = ErrorBody.class)))
+            })
+    Mono<ServerResponse> getUserByEmailOrIdentityDocument(ServerRequest serverRequest);
 }

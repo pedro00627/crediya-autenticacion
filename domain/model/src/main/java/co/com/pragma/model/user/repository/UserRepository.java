@@ -1,6 +1,7 @@
 package co.com.pragma.model.user.repository;
 
 import co.com.pragma.model.user.User;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface UserRepository {
@@ -9,4 +10,6 @@ public interface UserRepository {
     Mono<Boolean> existByEmail(String email);
 
     Mono<User> getUserByEmail(String email);
+
+    Flux<User> getUserByEmailOrIdentityDocument(String email, String identityDocument);
 }

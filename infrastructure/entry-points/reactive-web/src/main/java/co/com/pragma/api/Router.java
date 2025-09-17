@@ -15,27 +15,35 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 
 @Configuration
 public class Router {
+
+    public static final String API_V_1_USUARIOS = "/api/v1/usuarios";
+    public static final String API_V_1_USUARIOS_SEARCH = API_V_1_USUARIOS + "/search";
+    public static final String SAVE_USE_CASE = "saveUseCase";
+    public static final String GET_USER_BY_EMAIL = "getUserByEmail";
+
     @Bean
     @RouterOperations(
             {
                     @RouterOperation(
-                            path = "/api/v1/usuarios",
+                            path = API_V_1_USUARIOS,
                             produces = {APPLICATION_JSON_VALUE},
                             method = RequestMethod.POST,
                             beanClass = Handler.class,
-                            beanMethod = "saveUseCase"
+                            beanMethod = SAVE_USE_CASE
                     ),
                     @RouterOperation(
-                            path = "/api/v1/usuarios",
+                            path = API_V_1_USUARIOS,
                             produces = {APPLICATION_JSON_VALUE},
                             method = RequestMethod.GET,
                             beanClass = Handler.class,
-                            beanMethod = "getUserByEmail"
+                            beanMethod = GET_USER_BY_EMAIL
                     )
             }
+
     )
     public RouterFunction<ServerResponse> userRoutes(Handler handler) {
-        return route(POST("/api/v1/usuarios"), handler::saveUseCase)
-                .and(route(GET("/api/v1/usuarios"), handler::getUserByEmail));
+        return route(POST(API_V_1_USUARIOS), handler::saveUseCase)
+                .and(route(GET(API_V_1_USUARIOS), handler::getUserByEmail))
+                .andRoute(GET(API_V_1_USUARIOS_SEARCH), handler::getUserByEmailOrIdentityDocument);
     }
 }
