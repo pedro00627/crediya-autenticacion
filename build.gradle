@@ -1,7 +1,7 @@
 buildscript {
     ext {
         cleanArchitectureVersion = '3.26.1'
-        springBootVersion = '3.5.4'
+        springBootVersion = '3.5.6'
         sonarVersion = '6.3.1.5724'
         pitestVersion = '1.19.0-rc.1'
     }
@@ -29,7 +29,7 @@ ext {
     reactiveCommonsMapperVersion = '0.1.0'
     archunitVersion = '1.4.1'
     jjwtVersion = '0.12.6'
-    commonVersion = '0.0.53'
+    commonVersion = '0.0.60'
 }
 
 subprojects {

@@ -2,6 +2,7 @@ package co.com.pragma.api.security;
 
 import co.com.pragma.model.log.gateways.LoggerPort;
 import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.server.authorization.AuthorizationContext;
@@ -38,7 +39,12 @@ public class UserAuthorizationManager implements ReactiveAuthorizationManager<Au
      */
     @Override
     public Mono<AuthorizationDecision> check(Mono<Authentication> authentication, AuthorizationContext context) {
-        logger.debug("UserAuthorizationManager: Delegating check to UserAuthorizationLogic for context: {}", context.getExchange().getRequest().getPath().value());
-        return this.authorizationLogic.check(authentication, context);
+        return authorize(authentication, context).cast(AuthorizationDecision.class);
+    }
+
+    @Override
+    public Mono<AuthorizationResult> authorize(Mono<Authentication> authentication, AuthorizationContext context) {
+        logger.debug("UserAuthorizationManager: Delegating authorize to UserAuthorizationLogic for context: {}", context.getExchange().getRequest().getPath().value());
+        return this.authorizationLogic.authorize(authentication, context).cast(AuthorizationResult.class);
     }
 }

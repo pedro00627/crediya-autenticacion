@@ -10,8 +10,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation "org.springdoc:springdoc-openapi-starter-webflux-ui:${springdocVersion}"
 
-    // Dependencia a la librería common-logging
+    // Dependencias a las librerías common
     implementation "co.com.pragma:crediya-common-starter:${commonVersion}"
+    implementation "co.com.pragma:crediya-common-core:${commonVersion}"
 
     testImplementation project(':app-service')
 }

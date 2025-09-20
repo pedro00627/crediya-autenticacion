@@ -3,6 +3,8 @@ package co.com.pragma.api;
 import co.com.pragma.api.dto.request.UserRequestRecord;
 import co.com.pragma.api.exception.InvalidRequestException;
 import co.com.pragma.api.mapper.UserDTOMapper;
+import co.com.pragma.model.constants.ErrorMessages;
+import co.com.pragma.model.constants.QueryParameterConstants;
 import co.com.pragma.model.log.gateways.LoggerPort;
 import co.com.pragma.model.user.User;
 import co.com.pragma.usecase.user.UserUseCase;
@@ -39,7 +41,7 @@ public class Handler implements UserApi {
         // ToDo mover logger al flujo reactivo para enmascarar el email
         logger.info("Recibida petición para guardar usuario en la ruta: {}", serverRequest.path());
         return serverRequest.bodyToMono(UserRequestRecord.class)
-                .switchIfEmpty(Mono.error(new ServerWebInputException("El cuerpo de la petición no puede estar vacío."))) // Handle empty body
+                .switchIfEmpty(Mono.error(new ServerWebInputException(ErrorMessages.INVALID_REQUEST_BODY))) // Handle empty body
                 .flatMap(this::validateRequest) // Validate the DTO
                 .map(mapper::toModel)
                 .flatMap(useCase::saveUser)
@@ -51,7 +53,7 @@ public class Handler implements UserApi {
     @Override
     public Mono<ServerResponse> getUserByEmail(ServerRequest serverRequest) {
         // Extract email from query parameter, handle if absent
-        return serverRequest.queryParam("email")
+        return serverRequest.queryParam(QueryParameterConstants.EMAIL)
                 .map(email -> {
                     logger.info("Recibida petición para obtener usuario por email: {}", logger.maskEmail(email));
                     return useCase.getUserByEmail(email)
@@ -63,22 +65,22 @@ public class Handler implements UserApi {
                 })
                 .orElse(ServerResponse.badRequest() // Handle missing email parameter
                         .contentType(APPLICATION_JSON)
-                        .bodyValue("{\"error\": \"El parámetro 'email' es requerido.\"}"));
+                        .bodyValue("{\"error\": \"" + ErrorMessages.EMAIL_REQUIRED + "\"}"));
     }
 
     @Override
     public Mono<ServerResponse> getUserByEmailOrIdentityDocument(ServerRequest serverRequest) {
         return Mono.just(serverRequest)
-                .filter(req -> req.queryParam("email").isPresent() || req.queryParam("identityDocument").isPresent())
+                .filter(req -> req.queryParam(QueryParameterConstants.EMAIL).isPresent() || req.queryParam(QueryParameterConstants.IDENTITY_DOCUMENT).isPresent())
                 .flatMap(req -> {
-                    String email = req.queryParam("email").orElse(null);
-                    String identityDocument = req.queryParam("identityDocument").orElse(null);
+                    String email = req.queryParam(QueryParameterConstants.EMAIL).orElse(null);
+                    String identityDocument = req.queryParam(QueryParameterConstants.IDENTITY_DOCUMENT).orElse(null);
                     return ServerResponse.ok()
                             .contentType(MediaType.APPLICATION_JSON)
                             .body(useCase.getUserByEmailOrIdentityDocument(email, identityDocument), User.class);
                 })
                 .switchIfEmpty(ServerResponse.badRequest()
-                        .bodyValue("{\"error\": \"Falta email o documento\"}"));
+                        .bodyValue("{\"error\": \"" + ErrorMessages.EMAIL_OR_DOCUMENT_REQUIRED + "\"}"));
     }
 
     // This method validates the UserRequestRecord DTO for the save operation.

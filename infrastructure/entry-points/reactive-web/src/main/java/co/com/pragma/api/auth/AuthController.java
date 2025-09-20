@@ -1,12 +1,14 @@
 package co.com.pragma.api.auth;
 
+import co.com.pragma.api.auth.strategy.RoleStrategyContext;
+import co.com.pragma.model.constants.ApiConstants;
+import co.com.pragma.model.constants.ErrorMessages;
+import co.com.pragma.model.constants.HttpConstants;
 import co.com.pragma.model.log.gateways.LoggerPort;
 import co.com.pragma.model.security.PasswordEncryptor;
 import co.com.pragma.model.user.repository.UserRepository;
-import co.com.pragma.security.model.RoleConstants;
 import co.com.pragma.security.util.JWTUtil;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,22 +20,25 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping(ApiConstants.API_V1_BASE_PATH)
 public class AuthController {
 
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
     private final PasswordEncryptor passwordEncryptor;
-    private final LoggerPort logger; // Inyectar LoggerPort
+    private final LoggerPort logger;
+    private final RoleStrategyContext roleStrategyContext;
 
-    public AuthController(JWTUtil jwtUtil, UserRepository userRepository, PasswordEncryptor passwordEncryptor, LoggerPort logger) { // Añadir LoggerPort al constructor
+    public AuthController(JWTUtil jwtUtil, UserRepository userRepository, PasswordEncryptor passwordEncryptor,
+                          LoggerPort logger, RoleStrategyContext roleStrategyContext) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.passwordEncryptor = passwordEncryptor;
         this.logger = logger;
+        this.roleStrategyContext = roleStrategyContext;
     }
 
-    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = ApiConstants.LOGIN_PATH, produces = HttpConstants.APPLICATION_JSON)
     public Mono<ResponseEntity<Map<String, String>>> login(@RequestBody AuthRequest authRequest) {
         logger.info("Login attempt for username: {}", authRequest.username());
         return userRepository.getUserByEmail(authRequest.username())
@@ -54,31 +59,23 @@ public class AuthController {
                 .switchIfEmpty(Mono.defer(() -> {
                     logger.warn("Login failed for username: {}. Invalid credentials.", authRequest.username());
                     ResponseEntity<Map<String, String>> responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                            .body(Map.of("error", "Credenciales inválidas"));
+                            .body(Map.of("error", ErrorMessages.INVALID_CREDENTIALS));
                     return Mono.just(responseEntity);
                 }))
                 .onErrorResume(e -> {
                     logger.error("An unexpected error occurred during login for username {}: {}", e);
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(Map.of("error", "Error interno del servidor")));
+                            .body(Map.of("error", ErrorMessages.INTERNAL_SERVER_ERROR)));
                 });
     }
 
     private List<String> mapRoleIdToRoleName(Integer roleId) {
-        logger.debug("entra a mapRole" + roleId);
+        logger.debug("Mapping roles for roleId: {}", roleId);
         if (roleId == null) {
             logger.debug("Role ID is null, returning empty roles list.");
             return List.of();
         }
-        return switch (roleId) {
-            case 1 -> List.of(RoleConstants.ADMIN);
-            case 2 -> List.of(RoleConstants.ADVISOR);
-            case 3 -> List.of(RoleConstants.CLIENT);
-            default -> {
-                logger.warn("Unknown role ID: {}. Returning empty roles list.", roleId);
-                yield List.of();
-            }
-        };
+        return roleStrategyContext.getRolesForUser(roleId);
     }
 }
 

@@ -3,6 +3,7 @@ package co.com.pragma.api.security;
 import co.com.pragma.model.log.gateways.LoggerPort;
 import co.com.pragma.security.model.RoleConstants;
 import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,8 +30,13 @@ public class PostUserCreationAuthorizationManager implements ReactiveAuthorizati
 
     @Override
     public Mono<AuthorizationDecision> check(Mono<Authentication> authentication, AuthorizationContext object) {
+        return authorize(authentication, object).cast(AuthorizationDecision.class);
+    }
+
+    @Override
+    public Mono<AuthorizationResult> authorize(Mono<Authentication> authentication, AuthorizationContext object) {
         return authentication
-                .doOnNext(auth -> logger.debug("PostUserCreationAuthorizationManager: Checking authentication for user: {} with authorities: {}", auth.getName(), auth.getAuthorities()))
+                .doOnNext(auth -> logger.debug("PostUserCreationAuthorizationManager: Authorizing authentication for user: {} with authorities: {}", auth.getName(), auth.getAuthorities()))
                 .filter(Authentication::isAuthenticated)
                 .map(Authentication::getAuthorities)
                 .map(authorities -> authorities.stream()
@@ -48,6 +54,7 @@ public class PostUserCreationAuthorizationManager implements ReactiveAuthorizati
                 })
                 .map(AuthorizationDecision::new)
                 .doOnNext(decision -> logger.info("PostUserCreationAuthorizationManager: Authorization decision: {}", decision.isGranted()))
-                .defaultIfEmpty(new AuthorizationDecision(false));
+                .defaultIfEmpty(new AuthorizationDecision(false))
+                .cast(AuthorizationResult.class);
     }
 }

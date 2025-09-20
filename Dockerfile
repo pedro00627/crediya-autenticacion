@@ -1,29 +1,29 @@
-# === Etapa 1: Construcción (Build Stage) ===
-FROM gradle:9.0.0-jdk21-jammy
-WORKDIR /home/gradle/src
+# === Imagen base para construcción ===
+FROM gradle:9.0.0-jdk21-jammy AS build
+WORKDIR /workspace
 
-# Copiar archivos esenciales para el build
-COPY build.gradle settings.gradle gradlew ./
-COPY gradle ./gradle
+# Copiar archivos de versiones y Common primero
+COPY common-versions.gradle ./
+COPY Common ./Common
 
-# Asegurar permisos de ejecución para gradlew
-RUN chmod +x gradlew
+# Copiar el microservicio
+COPY Autenticacion ./Autenticacion
 
-# Copiar el código fuente
-COPY src ./src
+# Construir Common y luego el microservicio en un solo paso
+RUN apt-get update && apt-get install -y dos2unix && \
+    cd Common && chmod +x gradlew && ./gradlew publishToMavenLocal --no-daemon -x test && \
+    cd ../Autenticacion && dos2unix gradlew && chmod +x gradlew && \
+    ./gradlew bootJar --no-daemon -x test
 
-# Construir el JAR sin ejecutar los tests
-RUN ./gradlew bootJar --no-daemon -x test
-
-# === Etapa 2: Imagen final (Runtime Stage) ===
+# === Imagen final optimizada ===
 FROM gcr.io/distroless/java21-debian12
 WORKDIR /app
 
-# Copiar el JAR generado desde la etapa de construcción
-COPY --from=build /home/gradle/src/build/libs/*.jar ./app.jar
+# Copiar el JAR generado
+COPY --from=build /workspace/Autenticacion/applications/app-service/build/libs/*.jar ./autenticacion.jar
 
-# Exponer el puerto de la aplicación
+# Exponer el puerto correcto
 EXPOSE 8080
 
 # Comando de inicio
-ENTRYPOINT ["java", "-jar", "Autenticacion.jar"]
+ENTRYPOINT ["java", "-jar", "/app/autenticacion.jar"]

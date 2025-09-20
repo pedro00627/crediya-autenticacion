@@ -37,9 +37,9 @@ public class UserAuthorizationLogic {
      * @param context        El contexto de autorización, que contiene la solicitud.
      * @return Un {@link Mono} que emite un {@link AuthorizationDecision} indicando si la autorización es concedida o denegada.
      */
-    public Mono<AuthorizationDecision> check(Mono<Authentication> authentication, AuthorizationContext context) {
+    public Mono<AuthorizationDecision> authorize(Mono<Authentication> authentication, AuthorizationContext context) {
         return authentication
-                .doOnNext(auth -> logger.debug("UserAuthorizationLogic: Checking authentication for user: {} with authorities: {}", auth.getName(), auth.getAuthorities()))
+                .doOnNext(auth -> logger.debug("UserAuthorizationLogic: Authorizing authentication for user: {} with authorities: {}", auth.getName(), auth.getAuthorities()))
                 .filter(Authentication::isAuthenticated)
                 .map(auth -> {
                     Set<String> userRoles = auth.getAuthorities().stream()

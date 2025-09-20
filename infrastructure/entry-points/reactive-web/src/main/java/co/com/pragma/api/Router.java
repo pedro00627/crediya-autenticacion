@@ -1,5 +1,7 @@
 package co.com.pragma.api;
 
+import co.com.pragma.model.constants.ApiConstants;
+import co.com.pragma.model.constants.HttpConstants;
 import org.springdoc.core.annotations.RouterOperation;
 import org.springdoc.core.annotations.RouterOperations;
 import org.springframework.context.annotation.Bean;
@@ -8,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
@@ -16,8 +17,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 @Configuration
 public class Router {
 
-    public static final String API_V_1_USUARIOS = "/api/v1/usuarios";
-    public static final String API_V_1_USUARIOS_SEARCH = API_V_1_USUARIOS + "/search";
+    // Method names for documentation
     public static final String SAVE_USE_CASE = "saveUseCase";
     public static final String GET_USER_BY_EMAIL = "getUserByEmail";
 
@@ -25,15 +25,15 @@ public class Router {
     @RouterOperations(
             {
                     @RouterOperation(
-                            path = API_V_1_USUARIOS,
-                            produces = {APPLICATION_JSON_VALUE},
+                            path = ApiConstants.USERS_ENDPOINT,
+                            produces = {HttpConstants.APPLICATION_JSON},
                             method = RequestMethod.POST,
                             beanClass = Handler.class,
                             beanMethod = SAVE_USE_CASE
                     ),
                     @RouterOperation(
-                            path = API_V_1_USUARIOS,
-                            produces = {APPLICATION_JSON_VALUE},
+                            path = ApiConstants.USERS_ENDPOINT,
+                            produces = {HttpConstants.APPLICATION_JSON},
                             method = RequestMethod.GET,
                             beanClass = Handler.class,
                             beanMethod = GET_USER_BY_EMAIL
@@ -42,8 +42,8 @@ public class Router {
 
     )
     public RouterFunction<ServerResponse> userRoutes(Handler handler) {
-        return route(POST(API_V_1_USUARIOS), handler::saveUseCase)
-                .and(route(GET(API_V_1_USUARIOS), handler::getUserByEmail))
-                .andRoute(GET(API_V_1_USUARIOS_SEARCH), handler::getUserByEmailOrIdentityDocument);
+        return route(POST(ApiConstants.USERS_ENDPOINT), handler::saveUseCase)
+                .and(route(GET(ApiConstants.USERS_ENDPOINT), handler::getUserByEmail))
+                .andRoute(GET(ApiConstants.USERS_SEARCH_ENDPOINT), handler::getUserByEmailOrIdentityDocument);
     }
 }

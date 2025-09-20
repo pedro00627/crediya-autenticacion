@@ -14,7 +14,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
         SecurityAutoConfiguration.class,
         ReactiveSecurityAutoConfiguration.class
 })
-@Import({CorsConfig.class, SecurityHeadersConfig.class, ConfigTest.TestApplication.class})
+@Import({SecurityHeadersConfig.class, ConfigTest.TestApplication.class})
 class ConfigTest {
 
     private final WebTestClient webTestClient;
