@@ -50,10 +50,10 @@ class UserReactiveRepositoryAdapterTest {
     @BeforeEach
     void setUp() {
         // Inicializar repositoryAdapter manualmente, pasando todos los mocks
-        repositoryAdapter = new UserReactiveRepositoryAdapter(repository, mapper, logger, transactionalOperator, userDataMapper);
+        this.repositoryAdapter = new UserReactiveRepositoryAdapter(this.repository, this.mapper, this.logger, this.transactionalOperator, this.userDataMapper);
 
         // Se crean objetos de ejemplo para usar en todos los tests
-        user = new User(
+        this.user = new User(
                 "1",
                 "John",
                 "Doe",
@@ -66,7 +66,7 @@ class UserReactiveRepositoryAdapterTest {
                 ""
         );
 
-        userEntity = new UserEntity(
+        this.userEntity = new UserEntity(
                 "1",
                 "John",
                 "Doe",
@@ -83,46 +83,46 @@ class UserReactiveRepositoryAdapterTest {
     @Test
     void mustFindValueById() {
         // Arrange: Configurar los mocks para que devuelvan los objetos correctos
-        when(repository.findById("1")).thenReturn(Mono.just(userEntity));
-        when(userDataMapper.toDomain(userEntity)).thenReturn(user);
+        when(this.repository.findById("1")).thenReturn(Mono.just(this.userEntity));
+        when(this.userDataMapper.toDomain(this.userEntity)).thenReturn(this.user);
 
         // Act: Llamar al método que se está probando
-        Mono<User> result = repositoryAdapter.findById("1");
+        final Mono<User> result = this.repositoryAdapter.findById("1");
 
         // Assert: Verificar que el resultado es el esperado
         StepVerifier.create(result)
-                .expectNext(user)
+                .expectNext(this.user)
                 .verifyComplete();
     }
 
     @Test
     void mustFindAllValues() {
         // Arrange
-        when(repository.findAll()).thenReturn(Flux.just(userEntity));
-        when(userDataMapper.toDomain(userEntity)).thenReturn(user);
+        when(this.repository.findAll()).thenReturn(Flux.just(this.userEntity));
+        when(this.userDataMapper.toDomain(this.userEntity)).thenReturn(this.user);
 
         // Act
-        Flux<User> result = repositoryAdapter.findAll();
+        final Flux<User> result = this.repositoryAdapter.findAll();
 
         // Assert
         StepVerifier.create(result)
-                .expectNext(user)
+                .expectNext(this.user)
                 .verifyComplete();
     }
 
     @Test
     void mustFindByExample() {
         // Arrange
-        when(mapper.map(user, UserEntity.class)).thenReturn(userEntity);
-        when(repository.findAll(any(Example.class))).thenReturn(Flux.just(userEntity));
-        when(userDataMapper.toDomain(userEntity)).thenReturn(user);
+        when(this.mapper.map(this.user, UserEntity.class)).thenReturn(this.userEntity);
+        when(this.repository.findAll(any(Example.class))).thenReturn(Flux.just(this.userEntity));
+        when(this.userDataMapper.toDomain(this.userEntity)).thenReturn(this.user);
 
         // Act
-        Flux<User> result = repositoryAdapter.findByExample(user);
+        final Flux<User> result = this.repositoryAdapter.findByExample(this.user);
 
         // Assert
         StepVerifier.create(result)
-                .expectNext(user)
+                .expectNext(this.user)
                 .verifyComplete();
     }
 
@@ -130,28 +130,28 @@ class UserReactiveRepositoryAdapterTest {
     void mustSaveValue() {
         // Arrange
         // Mock para el operador transaccional, simplemente devuelve el Mono que recibe
-        when(transactionalOperator.transactional(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(userDataMapper.toEntity(user)).thenReturn(userEntity);
-        when(repository.save(any(UserEntity.class))).thenReturn(Mono.just(userEntity));
-        when(userDataMapper.toDomain(userEntity)).thenReturn(user);
+        when(this.transactionalOperator.transactional(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(this.userDataMapper.toEntity(this.user)).thenReturn(this.userEntity);
+        when(this.repository.save(any(UserEntity.class))).thenReturn(Mono.just(this.userEntity));
+        when(this.userDataMapper.toDomain(this.userEntity)).thenReturn(this.user);
 
         // Act
-        Mono<User> result = repositoryAdapter.saveUser(user);
+        final Mono<User> result = this.repositoryAdapter.saveUser(this.user);
 
         // Assert
         StepVerifier.create(result)
-                .expectNext(user)
+                .expectNext(this.user)
                 .verifyComplete();
     }
 
     @Test
     void shouldCheckIfEmailExists() {
         // Arrange
-        String email = "john.doe@example.com";
-        when(repository.existsByEmail(email)).thenReturn(Mono.just(true));
+        final String email = "john.doe@example.com";
+        when(this.repository.existsByEmail(email)).thenReturn(Mono.just(true));
 
         // Act
-        Mono<Boolean> result = repositoryAdapter.existByEmail(email);
+        final Mono<Boolean> result = this.repositoryAdapter.existByEmail(email);
 
         // Assert
         StepVerifier.create(result)

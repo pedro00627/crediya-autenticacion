@@ -20,29 +20,29 @@ public class InvalidRequestExceptionHandler implements ExceptionHandlerStrategy 
 
     private final LoggerPort logger;
 
-    public InvalidRequestExceptionHandler(LoggerPort logger) {
+    public InvalidRequestExceptionHandler(final LoggerPort logger) {
         this.logger = logger;
     }
 
     @Override
-    public boolean supports(Class<? extends Throwable> type) {
+    public boolean supports(final Class<? extends Throwable> type) {
         return InvalidRequestException.class.isAssignableFrom(type);
     }
 
     @Override
-    public Mono<ErrorResponseWrapper> handle(Throwable ex, ServerWebExchange exchange) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        InvalidRequestException exception = (InvalidRequestException) ex;
+    public Mono<ErrorResponseWrapper> handle(final Throwable ex, final ServerWebExchange exchange) {
+        final HttpStatus status = HttpStatus.BAD_REQUEST;
+        final InvalidRequestException exception = (InvalidRequestException) ex;
 
-        Map<String, String> messages = exception.getViolations().stream()
+        final Map<String, String> messages = exception.getViolations().stream()
                 .collect(Collectors.toMap(
                         v -> v.getPropertyPath().toString(),
                         ConstraintViolation::getMessage
                 ));
 
-        logger.info("Error de validación en la petición [{}]: {}", exchange.getRequest().getPath(), messages);
+        this.logger.info("Error de validación en la petición [{}]: {}", exchange.getRequest().getPath(), messages);
 
-        ErrorBody body = new ErrorBody(status.value(), "Validation Error", null, messages);
+        final ErrorBody body = new ErrorBody(status.value(), "Validation Error", null, messages);
         return Mono.just(new ErrorResponseWrapper(status, body));
     }
 }

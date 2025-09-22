@@ -40,7 +40,7 @@ class UserUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        user = new User(
+        this.user = new User(
                 null,
                 "John",
                 "Doe",
@@ -57,41 +57,41 @@ class UserUseCaseTest {
     @Test
     void saveUserShouldSucceedWhenValidationPasses() {
         // Arrange
-        User savedUser = new User(
+        final User savedUser = new User(
                 "id-123",
-                user.firstName(),
-                user.lastName(),
-                user.birthDate(),
-                user.email(),
-                user.identityDocument(),
-                user.phone(),
-                user.roleId(),
-                user.baseSalary(),
-                user.password()
+                this.user.firstName(),
+                this.user.lastName(),
+                this.user.birthDate(),
+                this.user.email(),
+                this.user.identityDocument(),
+                this.user.phone(),
+                this.user.roleId(),
+                this.user.baseSalary(),
+                this.user.password()
         );
-        when(userValidator.validateUser(any(User.class))).thenReturn(Mono.just(user));
-        when(userRepository.saveUser(any(User.class))).thenReturn(Mono.just(savedUser));
+        when(this.userValidator.validateUser(any(User.class))).thenReturn(Mono.just(this.user));
+        when(this.userRepository.saveUser(any(User.class))).thenReturn(Mono.just(savedUser));
 
         // Act
-        Mono<User> result = userUseCase.saveUser(user);
+        final Mono<User> result = this.userUseCase.saveUser(this.user);
 
         // Assert
         StepVerifier.create(result)
                 .expectNext(savedUser)
                 .verifyComplete();
 
-        verify(userValidator).validateUser(user);
-        verify(userRepository).saveUser(user);
+        verify(this.userValidator).validateUser(this.user);
+        verify(this.userRepository).saveUser(this.user);
     }
 
     @Test
     void saveUserShouldFailWhenValidationFails() {
         // Arrange
-        String errorMessage = "El correo electrónico ya existe";
-        when(userValidator.validateUser(any(User.class))).thenReturn(Mono.error(new BusinessException(errorMessage)));
+        final String errorMessage = "El correo electrónico ya existe";
+        when(this.userValidator.validateUser(any(User.class))).thenReturn(Mono.error(new BusinessException(errorMessage)));
 
         // Act
-        Mono<User> result = userUseCase.saveUser(user);
+        final Mono<User> result = this.userUseCase.saveUser(this.user);
 
         // Assert
         StepVerifier.create(result)

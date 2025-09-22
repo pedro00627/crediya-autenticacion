@@ -7,7 +7,7 @@ public class BusinessException extends RuntimeException {
     /**
      * @param message Mensaje de error personalizado.
      */
-    public BusinessException(String message) {
+    public BusinessException(final String message) {
         super(message);
     }
 }

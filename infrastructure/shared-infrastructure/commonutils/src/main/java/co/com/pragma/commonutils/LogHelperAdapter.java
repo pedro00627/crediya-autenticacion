@@ -8,32 +8,32 @@ import org.springframework.stereotype.Component;
 public class LogHelperAdapter implements LoggerPort {
 
     @Override
-    public void info(String message, Object... args) {
+    public void info(final String message, final Object... args) {
         LogHelper.info(message, args);
     }
 
     @Override
-    public void warn(String message, Object... args) {
+    public void warn(final String message, final Object... args) {
         LogHelper.warn(message, args);
     }
 
     @Override
-    public void debug(String message, Object... args) {
+    public void debug(final String message, final Object... args) {
         LogHelper.debug(message, args);
     }
 
     @Override
-    public void error(String message, Throwable throwable) {
+    public void error(final String message, final Throwable throwable) {
         LogHelper.error(message, throwable);
     }
 
     @Override
-    public String maskEmail(String email) {
+    public String maskEmail(final String email) {
         return LogHelper.maskEmail(email);
     }
 
     @Override
-    public String maskDocument(String documentId) {
+    public String maskDocument(final String documentId) {
         return LogHelper.maskDocument(documentId);
     }
 }

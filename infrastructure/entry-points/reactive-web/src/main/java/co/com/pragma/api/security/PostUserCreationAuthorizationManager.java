@@ -24,19 +24,19 @@ public class PostUserCreationAuthorizationManager implements ReactiveAuthorizati
     private static final Set<String> REQUIRED_ROLES = Set.of(RoleConstants.ADMIN, RoleConstants.ADVISOR);
     private final LoggerPort logger;
 
-    public PostUserCreationAuthorizationManager(LoggerPort logger) {
+    public PostUserCreationAuthorizationManager(final LoggerPort logger) {
         this.logger = logger;
     }
 
     @Override
-    public Mono<AuthorizationDecision> check(Mono<Authentication> authentication, AuthorizationContext object) {
-        return authorize(authentication, object).cast(AuthorizationDecision.class);
+    public Mono<AuthorizationDecision> check(final Mono<Authentication> authentication, final AuthorizationContext object) {
+        return this.authorize(authentication, object).cast(AuthorizationDecision.class);
     }
 
     @Override
-    public Mono<AuthorizationResult> authorize(Mono<Authentication> authentication, AuthorizationContext object) {
+    public Mono<AuthorizationResult> authorize(final Mono<Authentication> authentication, final AuthorizationContext object) {
         return authentication
-                .doOnNext(auth -> logger.debug("PostUserCreationAuthorizationManager: Authorizing authentication for user: {} with authorities: {}", auth.getName(), auth.getAuthorities()))
+                .doOnNext(auth -> this.logger.debug("PostUserCreationAuthorizationManager: Authorizing authentication for user: {} with authorities: {}", auth.getName(), auth.getAuthorities()))
                 .filter(Authentication::isAuthenticated)
                 .map(Authentication::getAuthorities)
                 .map(authorities -> authorities.stream()
@@ -44,16 +44,16 @@ public class PostUserCreationAuthorizationManager implements ReactiveAuthorizati
                         .collect(Collectors.toUnmodifiableSet()))
                 .map(userRoles -> {
                     // Normalizar roles removiendo el prefijo ROLE_ para comparación
-                    Set<String> normalizedRoles = userRoles.stream()
+                    final Set<String> normalizedRoles = userRoles.stream()
                             .map(role -> role.startsWith("ROLE_") ? role.substring(5) : role)
                             .collect(Collectors.toUnmodifiableSet());
 
-                    logger.debug("PostUserCreationAuthorizationManager: User roles: {} (normalized: {}). Required roles: {}", userRoles, normalizedRoles, REQUIRED_ROLES);
+                    this.logger.debug("PostUserCreationAuthorizationManager: User roles: {} (normalized: {}). Required roles: {}", userRoles, normalizedRoles, PostUserCreationAuthorizationManager.REQUIRED_ROLES);
 
-                    return normalizedRoles.stream().anyMatch(REQUIRED_ROLES::contains);
+                    return normalizedRoles.stream().anyMatch(PostUserCreationAuthorizationManager.REQUIRED_ROLES::contains);
                 })
                 .map(AuthorizationDecision::new)
-                .doOnNext(decision -> logger.info("PostUserCreationAuthorizationManager: Authorization decision: {}", decision.isGranted()))
+                .doOnNext(decision -> this.logger.info("PostUserCreationAuthorizationManager: Authorization decision: {}", decision.isGranted()))
                 .defaultIfEmpty(new AuthorizationDecision(false))
                 .cast(AuthorizationResult.class);
     }

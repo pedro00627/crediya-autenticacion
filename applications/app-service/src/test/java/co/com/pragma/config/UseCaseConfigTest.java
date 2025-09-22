@@ -14,7 +14,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration()
+@ContextConfiguration
 class UseCaseConfigTest {
     @MockitoBean
     private UserRepository userRepository;
@@ -31,7 +31,7 @@ class UseCaseConfigTest {
 
     @Test
     void testUserUseCaseBeanIsCreated() {
-        assertNotNull(userUseCase, "UserUseCase bean should not be null");
+        assertNotNull(this.userUseCase, "UserUseCase bean should not be null");
     }
 
 }

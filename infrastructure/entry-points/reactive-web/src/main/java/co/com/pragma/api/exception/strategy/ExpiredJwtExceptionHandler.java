@@ -21,23 +21,23 @@ public class ExpiredJwtExceptionHandler implements ExceptionHandlerStrategy {
 
     private final LoggerPort logger;
 
-    public ExpiredJwtExceptionHandler(LoggerPort logger) {
+    public ExpiredJwtExceptionHandler(final LoggerPort logger) {
         this.logger = logger;
     }
 
     @Override
-    public boolean supports(Class<? extends Throwable> type) {
+    public boolean supports(final Class<? extends Throwable> type) {
         return ExpiredJwtException.class.isAssignableFrom(type);
     }
 
     @Override
-    public Mono<ErrorResponseWrapper> handle(Throwable ex, ServerWebExchange exchange) {
-        HttpStatus status = HttpStatus.UNAUTHORIZED; // 401 para token expirado
-        String message = "El token de autenticación ha expirado. Por favor, inicie sesión nuevamente.";
+    public Mono<ErrorResponseWrapper> handle(final Throwable ex, final ServerWebExchange exchange) {
+        final HttpStatus status = HttpStatus.UNAUTHORIZED; // 401 para token expirado
+        final String message = "El token de autenticación ha expirado. Por favor, inicie sesión nuevamente.";
 
-        logger.warn("Token JWT expirado para la petición: {}", ex.getMessage());
+        this.logger.warn("Token JWT expirado para la petición: {}", ex.getMessage());
 
-        ErrorBody body = new ErrorBody(status.value(), status.getReasonPhrase(), message, null);
+        final ErrorBody body = new ErrorBody(status.value(), status.getReasonPhrase(), message, null);
         return Mono.just(new ErrorResponseWrapper(status, body));
     }
 }

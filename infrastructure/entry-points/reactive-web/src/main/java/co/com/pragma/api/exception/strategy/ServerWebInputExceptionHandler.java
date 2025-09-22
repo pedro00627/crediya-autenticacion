@@ -17,28 +17,28 @@ public class ServerWebInputExceptionHandler implements ExceptionHandlerStrategy 
 
     private final LoggerPort logger;
 
-    public ServerWebInputExceptionHandler(LoggerPort logger) {
+    public ServerWebInputExceptionHandler(final LoggerPort logger) {
         this.logger = logger;
     }
 
     @Override
-    public boolean supports(Class<? extends Throwable> type) {
+    public boolean supports(final Class<? extends Throwable> type) {
         return ServerWebInputException.class.isAssignableFrom(type);
     }
 
     @Override
-    public Mono<ErrorResponseWrapper> handle(Throwable ex, ServerWebExchange exchange) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        ServerWebInputException exception = (ServerWebInputException) ex;
+    public Mono<ErrorResponseWrapper> handle(final Throwable ex, final ServerWebExchange exchange) {
+        final HttpStatus status = HttpStatus.BAD_REQUEST;
+        final ServerWebInputException exception = (ServerWebInputException) ex;
 
-        logger.info("Error de entrada en la petición", exception.getReason());
+        this.logger.info("Error de entrada en la petición", exception.getReason());
 
         String reason = ErrorMessages.INVALID_REQUEST_FORMAT;
         if (ex.getMessage().contains("LocalDate")) {
             reason = ErrorMessages.INVALID_DATE_FORMAT_MESSAGE;
         }
 
-        ErrorBody body = new ErrorBody(status.value(), ErrorMessages.INVALID_INPUT_CATEGORY, reason, null);
+        final ErrorBody body = new ErrorBody(status.value(), ErrorMessages.INVALID_INPUT_CATEGORY, reason, null);
         return Mono.just(new ErrorResponseWrapper(status, body));
     }
 }

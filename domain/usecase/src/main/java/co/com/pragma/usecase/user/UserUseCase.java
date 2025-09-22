@@ -13,16 +13,16 @@ public class UserUseCase {
     private final UserValidator userValidator;
     private final PasswordEncryptor passwordEncryptor;
 
-    public UserUseCase(UserRepository userRepository, UserValidator userValidator, PasswordEncryptor passwordEncryptor) {
+    public UserUseCase(final UserRepository userRepository, final UserValidator userValidator, final PasswordEncryptor passwordEncryptor) {
         this.userRepository = userRepository;
         this.userValidator = userValidator;
         this.passwordEncryptor = passwordEncryptor;
     }
 
-    public Mono<User> saveUser(User user) {
-        return userValidator.validateUser(user)
+    public Mono<User> saveUser(final User user) {
+        return this.userValidator.validateUser(user)
                 .map(userToSave -> {
-                    String encodedPassword = passwordEncryptor.encode(userToSave.password());
+                    final String encodedPassword = this.passwordEncryptor.encode(userToSave.password());
                     return new User(
                             userToSave.id(),
                             userToSave.firstName(),
@@ -36,14 +36,14 @@ public class UserUseCase {
                             encodedPassword
                     );
                 })
-                .flatMap(userRepository::saveUser);
+                .flatMap(this.userRepository::saveUser);
     }
 
-    public Mono<User> getUserByEmail(String email) {
-        return userRepository.getUserByEmail(email);
+    public Mono<User> getUserByEmail(final String email) {
+        return this.userRepository.getUserByEmail(email);
     }
 
-    public Flux<User> getUserByEmailOrIdentityDocument(String email, String identityDocument) {
-        return userRepository.getUserByEmailOrIdentityDocument(email, identityDocument);
+    public Flux<User> getUserByEmailOrIdentityDocument(final String email, final String identityDocument) {
+        return this.userRepository.getUserByEmailOrIdentityDocument(email, identityDocument);
     }
 }

@@ -43,7 +43,7 @@ class UserValidatorTest {
 
     @BeforeEach
     void setUp() {
-        user = new User(
+        this.user = new User(
                 null,
                 "John",
                 "Doe",
@@ -60,32 +60,32 @@ class UserValidatorTest {
     @Test
     void validateUserShouldSucceedWhenAllValidationsPass() {
         // Arrange
-        when(userRepository.existByEmail(user.email())).thenReturn(Mono.just(false));
-        when(roleRepository.existsById(user.roleId())).thenReturn(Mono.just(true));
+        when(this.userRepository.existByEmail(this.user.email())).thenReturn(Mono.just(false));
+        when(this.roleRepository.existsById(this.user.roleId())).thenReturn(Mono.just(true));
 
         // Act
-        Mono<User> result = userValidator.validateUser(user);
+        final Mono<User> result = this.userValidator.validateUser(this.user);
 
         // Assert
         StepVerifier.create(result)
-                .expectNext(user)
+                .expectNext(this.user)
                 .verifyComplete();
     }
 
     @Test
     void validateUserShouldFailWhenSalaryIsOutOfRange() {
         // Arrange
-        User userWithInvalidSalary = new User(
+        final User userWithInvalidSalary = new User(
                 null, "Jane", "Doe", LocalDate.now(), "jane.doe@example.com",
                 "987654321", "3109876543", 2, MAX_BASE_SALARY + 1, ""
         );
 
         // Stub other parallel validations to ensure they don't fail with NPE
-        when(userRepository.existByEmail(userWithInvalidSalary.email())).thenReturn(Mono.just(false));
-        when(roleRepository.existsById(userWithInvalidSalary.roleId())).thenReturn(Mono.just(true));
+        when(this.userRepository.existByEmail(userWithInvalidSalary.email())).thenReturn(Mono.just(false));
+        when(this.roleRepository.existsById(userWithInvalidSalary.roleId())).thenReturn(Mono.just(true));
 
         // Act
-        Mono<User> result = userValidator.validateUser(userWithInvalidSalary);
+        final Mono<User> result = this.userValidator.validateUser(userWithInvalidSalary);
 
         // Assert
         StepVerifier.create(result)
@@ -97,46 +97,46 @@ class UserValidatorTest {
     @Test
     void validateUserShouldFailWhenRoleDoesNotExist() {
         // Arrange
-        when(userRepository.existByEmail(user.email())).thenReturn(Mono.just(false));
-        when(roleRepository.existsById(user.roleId())).thenReturn(Mono.just(false)); // Role does not exist
+        when(this.userRepository.existByEmail(this.user.email())).thenReturn(Mono.just(false));
+        when(this.roleRepository.existsById(this.user.roleId())).thenReturn(Mono.just(false)); // Role does not exist
 
         // Act
-        Mono<User> result = userValidator.validateUser(user);
+        final Mono<User> result = this.userValidator.validateUser(this.user);
 
         // Assert
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof BusinessException &&
-                        throwable.getMessage().equals(String.format(ROLE_NOT_FOUND_MESSAGE, user.roleId())))
+                        throwable.getMessage().equals(String.format(ROLE_NOT_FOUND_MESSAGE, this.user.roleId())))
                 .verify();
     }
 
     @Test
     void validateUserShouldFailWhenEmailAlreadyExists() {
         // Arrange
-        when(userRepository.existByEmail(user.email())).thenReturn(Mono.just(true)); // Email exists
-        when(roleRepository.existsById(user.roleId())).thenReturn(Mono.just(true));
+        when(this.userRepository.existByEmail(this.user.email())).thenReturn(Mono.just(true)); // Email exists
+        when(this.roleRepository.existsById(this.user.roleId())).thenReturn(Mono.just(true));
 
         // Act
-        Mono<User> result = userValidator.validateUser(user);
+        final Mono<User> result = this.userValidator.validateUser(this.user);
 
         // Assert
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof BusinessException &&
-                        throwable.getMessage().equals(String.format(EMAIL_ALREADY_EXISTS_MESSAGE, user.email())))
+                        throwable.getMessage().equals(String.format(EMAIL_ALREADY_EXISTS_MESSAGE, this.user.email())))
                 .verify();
     }
 
     @Test
     void validateUserShouldSucceedWhenRoleIdIsNull() {
         // Arrange
-        User userWithNullRole = new User(
+        final User userWithNullRole = new User(
                 null, "Sam", "Smith", LocalDate.now(), "sam.smith@example.com",
                 "555555555", "3205555555", null, 100000.0, ""
         );
-        when(userRepository.existByEmail(userWithNullRole.email())).thenReturn(Mono.just(false));
+        when(this.userRepository.existByEmail(userWithNullRole.email())).thenReturn(Mono.just(false));
 
         // Act
-        Mono<User> result = userValidator.validateUser(userWithNullRole);
+        final Mono<User> result = this.userValidator.validateUser(userWithNullRole);
 
         // Assert
         StepVerifier.create(result)
@@ -144,23 +144,23 @@ class UserValidatorTest {
                 .verifyComplete();
 
         // Verify that the role repository was never called
-        verify(roleRepository, never()).existsById(any());
+        verify(this.roleRepository, never()).existsById(any());
     }
 
     @Test
     void validateUserShouldFailWhenSalaryIsBelowRange() {
         // Arrange
-        User userWithNegativeSalary = new User(
+        final User userWithNegativeSalary = new User(
                 null, "Negative", "Salary", LocalDate.now(), "negative.salary@example.com",
                 "111222333", "3001112222", 3, -100.0, ""
         );
 
         // Stub other parallel validations to ensure they don't fail with NPE
-        when(userRepository.existByEmail(userWithNegativeSalary.email())).thenReturn(Mono.just(false));
-        when(roleRepository.existsById(userWithNegativeSalary.roleId())).thenReturn(Mono.just(true));
+        when(this.userRepository.existByEmail(userWithNegativeSalary.email())).thenReturn(Mono.just(false));
+        when(this.roleRepository.existsById(userWithNegativeSalary.roleId())).thenReturn(Mono.just(true));
 
         // Act
-        Mono<User> result = userValidator.validateUser(userWithNegativeSalary);
+        final Mono<User> result = this.userValidator.validateUser(userWithNegativeSalary);
 
         // Assert
         StepVerifier.create(result)
@@ -171,14 +171,14 @@ class UserValidatorTest {
 
     @ParameterizedTest
     @ValueSource(doubles = {MIN_BASE_SALARY, MAX_BASE_SALARY})
-    void validateUserShouldSucceedWhenSalaryIsOnBoundaries(double boundarySalary) {
+    void validateUserShouldSucceedWhenSalaryIsOnBoundaries(final double boundarySalary) {
         // Arrange
-        User userWithBoundarySalary = new User(null, "Boundary", "Test", LocalDate.now(), "boundary@example.com", "444555666", "3154445555", 1, boundarySalary, "");
-        when(userRepository.existByEmail(userWithBoundarySalary.email())).thenReturn(Mono.just(false));
-        when(roleRepository.existsById(userWithBoundarySalary.roleId())).thenReturn(Mono.just(true));
+        final User userWithBoundarySalary = new User(null, "Boundary", "Test", LocalDate.now(), "boundary@example.com", "444555666", "3154445555", 1, boundarySalary, "");
+        when(this.userRepository.existByEmail(userWithBoundarySalary.email())).thenReturn(Mono.just(false));
+        when(this.roleRepository.existsById(userWithBoundarySalary.roleId())).thenReturn(Mono.just(true));
 
         // Act
-        Mono<User> result = userValidator.validateUser(userWithBoundarySalary);
+        final Mono<User> result = this.userValidator.validateUser(userWithBoundarySalary);
 
         // Assert
         StepVerifier.create(result)

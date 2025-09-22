@@ -9,17 +9,17 @@ public class BCryptPasswordEncryptor implements PasswordEncryptor {
 
     private final PasswordEncoder passwordEncoder;
 
-    public BCryptPasswordEncryptor(PasswordEncoder passwordEncoder) {
+    public BCryptPasswordEncryptor(final PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public String encode(String rawPassword) {
-        return passwordEncoder.encode(rawPassword);
+    public String encode(final String rawPassword) {
+        return this.passwordEncoder.encode(rawPassword);
     }
 
     @Override
-    public boolean matches(String rawPassword, String encodedPassword) {
-        return passwordEncoder.matches(rawPassword, encodedPassword);
+    public boolean matches(final String rawPassword, final String encodedPassword) {
+        return this.passwordEncoder.matches(rawPassword, encodedPassword);
     }
 }

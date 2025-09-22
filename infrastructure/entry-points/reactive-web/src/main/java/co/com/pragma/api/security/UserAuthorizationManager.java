@@ -24,9 +24,9 @@ public class UserAuthorizationManager implements ReactiveAuthorizationManager<Au
      *
      * @param logger El puerto de logging para registrar eventos.
      */
-    public UserAuthorizationManager(LoggerPort logger) {
+    public UserAuthorizationManager(final LoggerPort logger) {
         this.logger = logger;
-        this.authorizationLogic = new UserAuthorizationLogic(logger);
+        authorizationLogic = new UserAuthorizationLogic(logger);
     }
 
     /**
@@ -38,13 +38,13 @@ public class UserAuthorizationManager implements ReactiveAuthorizationManager<Au
      * @return Un {@link Mono} que emite un {@link AuthorizationDecision} indicando si la autorización es concedida o denegada.
      */
     @Override
-    public Mono<AuthorizationDecision> check(Mono<Authentication> authentication, AuthorizationContext context) {
-        return authorize(authentication, context).cast(AuthorizationDecision.class);
+    public Mono<AuthorizationDecision> check(final Mono<Authentication> authentication, final AuthorizationContext context) {
+        return this.authorize(authentication, context).cast(AuthorizationDecision.class);
     }
 
     @Override
-    public Mono<AuthorizationResult> authorize(Mono<Authentication> authentication, AuthorizationContext context) {
-        logger.debug("UserAuthorizationManager: Delegating authorize to UserAuthorizationLogic for context: {}", context.getExchange().getRequest().getPath().value());
-        return this.authorizationLogic.authorize(authentication, context).cast(AuthorizationResult.class);
+    public Mono<AuthorizationResult> authorize(final Mono<Authentication> authentication, final AuthorizationContext context) {
+        this.logger.debug("UserAuthorizationManager: Delegating authorize to UserAuthorizationLogic for context: {}", context.getExchange().getRequest().getPath().value());
+        return authorizationLogic.authorize(authentication, context).cast(AuthorizationResult.class);
     }
 }

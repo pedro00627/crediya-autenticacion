@@ -15,7 +15,7 @@ public class RoleReactiveRepositoryAdapter implements RoleRepository {
     private final TransactionalOperator transactionalOperator;
 
     @Override
-    public Mono<Boolean> existsById(Integer id) {
-        return repository.existsById(id).as(transactionalOperator::transactional);
+    public Mono<Boolean> existsById(final Integer id) {
+        return this.repository.existsById(id).as(this.transactionalOperator::transactional);
     }
 }

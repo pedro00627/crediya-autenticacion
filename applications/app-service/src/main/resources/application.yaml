@@ -9,7 +9,7 @@ spring:
   r2dbc:
     url: r2dbc:postgresql://localhost:5432/crediya
     username: ${DB_USER}
-    password: ${DB_SECRET}
+    password: ${DB_PASSWORD}
     properties:
       schema: autenticacion
     pool:

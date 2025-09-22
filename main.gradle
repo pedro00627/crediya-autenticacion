@@ -145,7 +145,7 @@ pitestReportAggregate {
             subprojects.each { subproject ->
                 def xmlReport = subproject.layout.buildDirectory.file("reports/pitest/mutations.xml").get().asFile
                 if (xmlReport.exists()) {
-                    def xmlContent = xmlReport.replaceAll("<\\?xml[^>]*>", "")
+                    def xmlContent = xmlReport.text.replaceAll("<\\?xml[^>]*>", "")
                     xmlContent = xmlContent.replaceAll("</?mutations( partial=\"true\")?>", "")
                     writer.write(xmlContent.trim() + "\n")
                 }
@@ -157,6 +157,6 @@ pitestReportAggregate {
 
 if (project == rootProject) {
     tasks.named('wrapper') {
-        gradleVersion = '8.14.3'
+        gradleVersion = '9.0.0'
     }
 }
