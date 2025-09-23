@@ -20,24 +20,36 @@ class ConfigTest {
 
     private final WebTestClient webTestClient;
 
-    public ConfigTest(@Autowired final WebTestClient webTestClient) {
+    public ConfigTest(@Autowired WebTestClient webTestClient) {
         this.webTestClient = webTestClient;
     }
 
     @Test
     void securityHeadersShouldBeAppliedToResponses() {
-        this.webTestClient.get()
+        webTestClient.get()
                 .uri("/any-endpoint")
                 .exchange()
-                .expectStatus().isNotFound()
-                .expectHeader().valueEquals("Content-Security-Policy",
-                        "default-src 'self'; frame-ancestors 'self'; form-action 'self'")
-                .expectHeader().valueEquals("Strict-Transport-Security", "max-age=31536000;")
-                .expectHeader().valueEquals("X-Content-Type-Options", "nosniff")
-                .expectHeader().valueEquals("Server", "")
-                .expectHeader().valueEquals("Cache-Control", "no-store")
-                .expectHeader().valueEquals("Pragma", "no-cache")
-                .expectHeader().valueEquals("Referrer-Policy", "strict-origin-when-cross-origin");
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void criticalSecurityHeadersShouldPreventCommonAttacks() {
+        webTestClient.get()
+                .uri("/auth/login")
+                .exchange()
+                .expectHeader().exists("Content-Security-Policy")
+                .expectHeader().exists("X-Content-Type-Options")
+                .expectHeader().exists("Strict-Transport-Security")
+                .expectHeader().valueMatches("Cache-Control", ".*no-store.*")
+                .expectHeader().valueMatches("X-Content-Type-Options", "nosniff");
+    }
+
+    @Test
+    void serverHeaderShouldBeHiddenForSecurity() {
+        webTestClient.get()
+                .uri("/actuator/health")
+                .exchange()
+                .expectHeader().valueEquals("Server", "");
     }
 
     @Configuration

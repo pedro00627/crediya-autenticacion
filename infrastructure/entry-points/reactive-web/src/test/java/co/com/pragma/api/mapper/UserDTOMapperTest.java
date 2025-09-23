@@ -26,13 +26,13 @@ class UserDTOMapperTest {
 
     @BeforeEach
     void setUp() {
-        this.mapper = Mappers.getMapper(UserDTOMapper.class);
+        mapper = Mappers.getMapper(UserDTOMapper.class);
     }
 
     @Test
     void shouldMapUserToResponseRecord() {
         // Arrange
-        final User user = new User(
+        User user = new User(
                 "1",
                 "John",
                 "Doe",
@@ -46,7 +46,7 @@ class UserDTOMapperTest {
         );
 
         // Act
-        final UserResponseRecord response = this.mapper.toResponse(user);
+        UserResponseRecord response = mapper.toResponse(user);
 
         // Assert
         assertNotNull(response);
@@ -64,7 +64,7 @@ class UserDTOMapperTest {
     @Test
     void shouldMapRequestRecordToUserModel() {
         // Arrange
-        final UserRequestRecord request = new UserRequestRecord(
+        UserRequestRecord request = new UserRequestRecord(
                 "Jane",
                 "Smith",
                 LocalDate.of(1985, 8, 20),
@@ -77,7 +77,7 @@ class UserDTOMapperTest {
         );
 
         // Act
-        final User user = this.mapper.toModel(request);
+        User user = mapper.toModel(request);
 
         // Assert
         assertNotNull(user);
@@ -95,9 +95,9 @@ class UserDTOMapperTest {
 
     @ParameterizedTest
     @MethodSource("userToResponseTestCases")
-    void shouldMapUserToResponseWithDifferentValues(final User user, final String scenario) {
+    void shouldMapUserToResponseWithDifferentValues(User user, String scenario) {
         // Act
-        final UserResponseRecord response = this.mapper.toResponse(user);
+        UserResponseRecord response = mapper.toResponse(user);
 
         // Assert
         assertNotNull(response, scenario);
@@ -114,9 +114,9 @@ class UserDTOMapperTest {
 
     @ParameterizedTest
     @MethodSource("requestToModelTestCases")
-    void shouldMapRequestToModelWithDifferentValues(final UserRequestRecord request, final String scenario) {
+    void shouldMapRequestToModelWithDifferentValues(UserRequestRecord request, String scenario) {
         // Act
-        final User user = this.mapper.toModel(request);
+        User user = mapper.toModel(request);
 
         // Assert
         assertNotNull(user, scenario);
@@ -135,12 +135,12 @@ class UserDTOMapperTest {
     @Test
     void shouldHandleNullUserFields() {
         // Arrange
-        final User userWithNulls = new User(
+        User userWithNulls = new User(
                 null, null, null, null, null, null, null, null, null, null
         );
 
         // Act
-        final UserResponseRecord response = this.mapper.toResponse(userWithNulls);
+        UserResponseRecord response = mapper.toResponse(userWithNulls);
 
         // Assert
         assertNotNull(response);
@@ -158,12 +158,12 @@ class UserDTOMapperTest {
     @Test
     void shouldHandleNullRequestFields() {
         // Arrange
-        final UserRequestRecord requestWithNulls = new UserRequestRecord(
+        UserRequestRecord requestWithNulls = new UserRequestRecord(
                 null, null, null, null, null, null, null, null, null
         );
 
         // Act
-        final User user = this.mapper.toModel(requestWithNulls);
+        User user = mapper.toModel(requestWithNulls);
 
         // Assert
         assertNotNull(user);
@@ -182,13 +182,13 @@ class UserDTOMapperTest {
     @Test
     void shouldMapRoleIdCorrectlyFromStringToInteger() {
         // Arrange
-        final UserRequestRecord request = new UserRequestRecord(
+        UserRequestRecord request = new UserRequestRecord(
                 "Test", "User", LocalDate.now(), "test@example.com",
                 "123456789", "3001234567", "3", 50000.0, "password"
         );
 
         // Act
-        final User user = this.mapper.toModel(request);
+        User user = mapper.toModel(request);
 
         // Assert
         assertEquals(3, user.roleId());
@@ -197,13 +197,13 @@ class UserDTOMapperTest {
     @Test
     void shouldMapRoleIdCorrectlyFromIntegerToString() {
         // Arrange
-        final User user = new User(
+        User user = new User(
                 "1", "Test", "User", LocalDate.now(), "test@example.com",
                 "123456789", "3001234567", 3, 50000.0, "password"
         );
 
         // Act
-        final UserResponseRecord response = this.mapper.toResponse(user);
+        UserResponseRecord response = mapper.toResponse(user);
 
         // Assert
         assertEquals("3", response.roleId());

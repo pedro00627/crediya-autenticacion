@@ -28,7 +28,7 @@ public class Handler implements UserApi {
     private final UserDTOMapper mapper;
     private final Validator validator;
 
-    public Handler(final LoggerPort logger, final UserUseCase useCase, final UserDTOMapper mapper, final Validator validator) {
+    public Handler(LoggerPort logger, UserUseCase useCase, UserDTOMapper mapper, Validator validator) {
         this.logger = logger;
         this.useCase = useCase;
         this.mapper = mapper;
@@ -36,27 +36,27 @@ public class Handler implements UserApi {
     }
 
     @Override
-    public Mono<ServerResponse> saveUseCase(final ServerRequest serverRequest) {
+    public Mono<ServerResponse> saveUseCase(ServerRequest serverRequest) {
         // ToDo mover logger al flujo reactivo para enmascarar el email
-        this.logger.info("Recibida petición para guardar usuario en la ruta: {}", serverRequest.path());
+        logger.info("Recibida petición para guardar usuario en la ruta: {}", serverRequest.path());
         return serverRequest.bodyToMono(UserRequestRecord.class)
                 .switchIfEmpty(Mono.error(new ServerWebInputException(ErrorMessages.INVALID_REQUEST_BODY))) // Handle empty body
                 .flatMap(this::validateRequest) // Validate the DTO
-                .map(this.mapper::toModel)
-                .flatMap(this.useCase::saveUser)
+                .map(mapper::toModel)
+                .flatMap(useCase::saveUser)
                 .flatMap(user -> ServerResponse.ok()
                         .contentType(APPLICATION_JSON)
-                        .bodyValue(this.mapper.toResponse(user)));
+                        .bodyValue(mapper.toResponse(user)));
     }
 
     @Override
-    public Mono<ServerResponse> getUserByEmail(final ServerRequest serverRequest) {
+    public Mono<ServerResponse> getUserByEmail(ServerRequest serverRequest) {
         // Extract email from query parameter, handle if absent
         return serverRequest.queryParam(QueryParameterConstants.EMAIL)
                 .map(email -> {
-                    this.logger.info("Recibida petición para obtener usuario por email: {}", this.logger.maskEmail(email));
-                    return this.useCase.getUserByEmail(email)
-                            .map(this.mapper::toResponse) // Use instance method reference
+                    logger.info("Recibida petición para obtener usuario por email: {}", logger.maskEmail(email));
+                    return useCase.getUserByEmail(email)
+                            .map(mapper::toResponse) // Use instance method reference
                             .flatMap(response -> ServerResponse.ok()
                                     .contentType(APPLICATION_JSON)
                                     .bodyValue(response))
@@ -68,27 +68,27 @@ public class Handler implements UserApi {
     }
 
     @Override
-    public Mono<ServerResponse> getUserByEmailOrIdentityDocument(final ServerRequest serverRequest) {
+    public Mono<ServerResponse> getUserByEmailOrIdentityDocument(ServerRequest serverRequest) {
         return Mono.just(serverRequest)
                 .filter(req -> req.queryParam(QueryParameterConstants.EMAIL).isPresent() || req.queryParam(QueryParameterConstants.IDENTITY_DOCUMENT).isPresent())
                 .flatMap(req -> {
-                    final String email = req.queryParam(QueryParameterConstants.EMAIL).orElse(null);
-                    final String identityDocument = req.queryParam(QueryParameterConstants.IDENTITY_DOCUMENT).orElse(null);
+                    String email = req.queryParam(QueryParameterConstants.EMAIL).orElse(null);
+                    String identityDocument = req.queryParam(QueryParameterConstants.IDENTITY_DOCUMENT).orElse(null);
                     return ServerResponse.ok()
                             .contentType(APPLICATION_JSON)
-                            .body(this.useCase.getUserByEmailOrIdentityDocument(email, identityDocument), User.class);
+                            .body(useCase.getUserByEmailOrIdentityDocument(email, identityDocument), User.class);
                 })
                 .switchIfEmpty(ServerResponse.badRequest()
                         .bodyValue("{\"error\": \"" + ErrorMessages.EMAIL_OR_DOCUMENT_REQUIRED + "\"}"));
     }
 
     // This method validates the UserRequestRecord DTO for the save operation.
-    private Mono<UserRequestRecord> validateRequest(final UserRequestRecord request) {
-        final Set<ConstraintViolation<UserRequestRecord>> violations = this.validator.validate(request);
+    private Mono<UserRequestRecord> validateRequest(UserRequestRecord request) {
+        Set<ConstraintViolation<UserRequestRecord>> violations = validator.validate(request);
         if (violations.isEmpty()) {
             return Mono.just(request);
         }
-        this.logger.info("La validación de la petición falló. Violaciones: {}", violations);
+        logger.info("La validación de la petición falló. Violaciones: {}", violations);
         return Mono.error(new InvalidRequestException("Invalid request due to validation errors.", violations));
     }
 }

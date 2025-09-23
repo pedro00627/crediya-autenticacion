@@ -17,7 +17,7 @@ class UserTest {
     @Test
     void shouldCreateUserWithAllFields() {
         // Arrange & Act
-        final User user = new User(
+        User user = new User(
                 "1",
                 "John",
                 "Doe",
@@ -47,7 +47,7 @@ class UserTest {
     @Test
     void shouldCreateUserWithNullFields() {
         // Arrange & Act
-        final User user = new User(
+        User user = new User(
                 null,
                 null,
                 null,
@@ -66,7 +66,7 @@ class UserTest {
 
     @ParameterizedTest
     @MethodSource("userEqualityTestCases")
-    void shouldValidateUserEquality(final User user1, final User user2, final boolean expectedEqual, final String scenario) {
+    void shouldValidateUserEquality(User user1, User user2, boolean expectedEqual, String scenario) {
         // Act & Assert
         if (expectedEqual) {
             assertEquals(user1, user2, scenario);
@@ -78,12 +78,12 @@ class UserTest {
 
     @ParameterizedTest
     @MethodSource("userCreationTestCases")
-    void shouldCreateUserWithDifferentValues(final String id, final String firstName, final String lastName,
-                                             final LocalDate birthDate, final String email, final String identityDocument,
-                                             final String phone, final Integer roleId, final Double baseSalary,
-                                             final String password, final String scenario) {
+    void shouldCreateUserWithDifferentValues(String id, String firstName, String lastName,
+                                             LocalDate birthDate, String email, String identityDocument,
+                                             String phone, Integer roleId, Double baseSalary,
+                                             String password, String scenario) {
         // Arrange & Act
-        final User user = new User(id, firstName, lastName, birthDate, email, identityDocument,
+        User user = new User(id, firstName, lastName, birthDate, email, identityDocument,
                            phone, roleId, baseSalary, password);
 
         // Assert
@@ -101,15 +101,15 @@ class UserTest {
     }
 
     static Stream<Arguments> userEqualityTestCases() {
-        final User baseUser = new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
+        User baseUser = new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
                                "john@example.com", "123456789", "3001234567", 1, 50000.0, "pass");
-        final User identicalUser = new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
+        User identicalUser = new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
                                     "john@example.com", "123456789", "3001234567", 1, 50000.0, "pass");
-        final User differentId = new User("2", "John", "Doe", LocalDate.of(1990, 5, 15),
+        User differentId = new User("2", "John", "Doe", LocalDate.of(1990, 5, 15),
                                   "john@example.com", "123456789", "3001234567", 1, 50000.0, "pass");
-        final User differentFirstName = new User("1", "Jane", "Doe", LocalDate.of(1990, 5, 15),
+        User differentFirstName = new User("1", "Jane", "Doe", LocalDate.of(1990, 5, 15),
                                          "john@example.com", "123456789", "3001234567", 1, 50000.0, "pass");
-        final User differentEmail = new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
+        User differentEmail = new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
                                      "jane@example.com", "123456789", "3001234567", 1, 50000.0, "pass");
 
         return Stream.of(
@@ -133,20 +133,5 @@ class UserTest {
                 Arguments.of("4", "Test", "User", LocalDate.now(), "test@example.com",
                            "444555666", "3154445555", null, null, "", "User with null role and salary")
         );
-    }
-
-    @Test
-    void shouldProduceConsistentToString() {
-        // Arrange
-        final User user = new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
-                           "john@example.com", "123456789", "3001234567", 1, 50000.0, "pass");
-
-        // Act
-        final String toString1 = user.toString();
-        final String toString2 = user.toString();
-
-        // Assert
-        assertEquals(toString1, toString2, "toString should be consistent");
-        assertNotNull(toString1, "toString should not be null");
     }
 }

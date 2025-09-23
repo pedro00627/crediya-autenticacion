@@ -25,13 +25,13 @@ class UserDataMapperTest {
 
     @BeforeEach
     void setUp() {
-        this.mapper = Mappers.getMapper(UserDataMapper.class);
+        mapper = Mappers.getMapper(UserDataMapper.class);
     }
 
     @Test
     void shouldMapEntityToDomain() {
         // Arrange
-        final UserEntity entity = new UserEntity(
+        UserEntity entity = new UserEntity(
                 "1",
                 "John",
                 "Doe",
@@ -45,7 +45,7 @@ class UserDataMapperTest {
         );
 
         // Act
-        final User domain = this.mapper.toDomain(entity);
+        User domain = mapper.toDomain(entity);
 
         // Assert
         assertNotNull(domain);
@@ -64,7 +64,7 @@ class UserDataMapperTest {
     @Test
     void shouldMapDomainToEntity() {
         // Arrange
-        final User domain = new User(
+        User domain = new User(
                 "2",
                 "Jane",
                 "Smith",
@@ -78,7 +78,7 @@ class UserDataMapperTest {
         );
 
         // Act
-        final UserEntity entity = this.mapper.toEntity(domain);
+        UserEntity entity = mapper.toEntity(domain);
 
         // Assert
         assertNotNull(entity);
@@ -96,9 +96,9 @@ class UserDataMapperTest {
 
     @ParameterizedTest
     @MethodSource("entityToDomainTestCases")
-    void shouldMapEntityToDomainWithDifferentValues(final UserEntity entity, final String scenario) {
+    void shouldMapEntityToDomainWithDifferentValues(UserEntity entity, String scenario) {
         // Act
-        final User domain = this.mapper.toDomain(entity);
+        User domain = mapper.toDomain(entity);
 
         // Assert
         assertNotNull(domain, scenario);
@@ -116,9 +116,9 @@ class UserDataMapperTest {
 
     @ParameterizedTest
     @MethodSource("domainToEntityTestCases")
-    void shouldMapDomainToEntityWithDifferentValues(final User domain, final String scenario) {
+    void shouldMapDomainToEntityWithDifferentValues(User domain, String scenario) {
         // Act
-        final UserEntity entity = this.mapper.toEntity(domain);
+        UserEntity entity = mapper.toEntity(domain);
 
         // Assert
         assertNotNull(entity, scenario);
@@ -137,12 +137,12 @@ class UserDataMapperTest {
     @Test
     void shouldHandleNullEntityFields() {
         // Arrange
-        final UserEntity entityWithNulls = new UserEntity(
+        UserEntity entityWithNulls = new UserEntity(
                 null, null, null, null, null, null, null, null, null, null
         );
 
         // Act
-        final User domain = this.mapper.toDomain(entityWithNulls);
+        User domain = mapper.toDomain(entityWithNulls);
 
         // Assert
         assertNotNull(domain);
@@ -161,12 +161,12 @@ class UserDataMapperTest {
     @Test
     void shouldHandleNullDomainFields() {
         // Arrange
-        final User domainWithNulls = new User(
+        User domainWithNulls = new User(
                 null, null, null, null, null, null, null, null, null, null
         );
 
         // Act
-        final UserEntity entity = this.mapper.toEntity(domainWithNulls);
+        UserEntity entity = mapper.toEntity(domainWithNulls);
 
         // Assert
         assertNotNull(entity);
@@ -185,7 +185,7 @@ class UserDataMapperTest {
     @Test
     void shouldMaintainDataIntegrityInBidirectionalMapping() {
         // Arrange
-        final User originalDomain = new User(
+        User originalDomain = new User(
                 "3",
                 "Test",
                 "User",
@@ -199,8 +199,8 @@ class UserDataMapperTest {
         );
 
         // Act
-        final UserEntity entity = this.mapper.toEntity(originalDomain);
-        final User mappedBackDomain = this.mapper.toDomain(entity);
+        UserEntity entity = mapper.toEntity(originalDomain);
+        User mappedBackDomain = mapper.toDomain(entity);
 
         // Assert
         assertEquals(originalDomain, mappedBackDomain, "Bidirectional mapping should maintain data integrity");
@@ -209,7 +209,7 @@ class UserDataMapperTest {
     @Test
     void shouldHandleSpecialCharactersInFields() {
         // Arrange
-        final UserEntity entityWithSpecialChars = new UserEntity(
+        UserEntity entityWithSpecialChars = new UserEntity(
                 "special-id-123",
                 "José María",
                 "O'Connor-García",
@@ -223,7 +223,7 @@ class UserDataMapperTest {
         );
 
         // Act
-        final User domain = this.mapper.toDomain(entityWithSpecialChars);
+        User domain = mapper.toDomain(entityWithSpecialChars);
 
         // Assert
         assertNotNull(domain);

@@ -2,5 +2,9 @@ dependencies {
     implementation project(':model')
     implementation "co.com.pragma:crediya-common-starter:${commonVersion}"
     implementation 'org.springframework:spring-context'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
 }
 

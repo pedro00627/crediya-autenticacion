@@ -16,22 +16,22 @@ public class DefaultExceptionHandler implements ExceptionHandlerStrategy {
 
     private final LoggerPort logger;
 
-    public DefaultExceptionHandler(final LoggerPort logger) {
+    public DefaultExceptionHandler(LoggerPort logger) {
         this.logger = logger;
     }
 
     @Override
-    public boolean supports(final Class<? extends Throwable> type) {
+    public boolean supports(Class<? extends Throwable> type) {
         return true;
     }
 
     @Override
-    public Mono<ErrorResponseWrapper> handle(final Throwable ex, final ServerWebExchange exchange) {
+    public Mono<ErrorResponseWrapper> handle(Throwable ex, ServerWebExchange exchange) {
         final HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        this.logger.error("Ocurrió una excepción no controlada para la petición", ex);
+        logger.error("Ocurrió una excepción no controlada para la petición", ex);
 
         final String message = "Ocurrió un error inesperado. Por favor, contacte al soporte.";
-        final ErrorBody body = new ErrorBody(status.value(), "Internal Server Error", message, null);
+        ErrorBody body = new ErrorBody(status.value(), "Internal Server Error", message, null);
 
         return Mono.just(new ErrorResponseWrapper(status, body));
     }

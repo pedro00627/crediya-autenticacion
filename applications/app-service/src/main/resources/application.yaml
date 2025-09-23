@@ -50,6 +50,7 @@ jwt:
     - /swagger-ui/**
     - /webjars/**
     - /v3/api-docs/**
+    - /actuator/**
 
 security:
   rules:

@@ -15,7 +15,7 @@ public class RoleStrategyContext {
     private final List<RoleStrategy> strategies;
     private final LoggerPort logger;
 
-    public RoleStrategyContext(final List<RoleStrategy> strategies, final LoggerPort logger) {
+    public RoleStrategyContext(List<RoleStrategy> strategies, LoggerPort logger) {
         this.strategies = strategies;
         this.logger = logger;
     }
@@ -26,13 +26,13 @@ public class RoleStrategyContext {
      * @param roleId ID del rol del usuario
      * @return Lista de roles asignados al usuario
      */
-    public List<String> getRolesForUser(final Integer roleId) {
-        return this.strategies.stream()
+    public List<String> getRolesForUser(Integer roleId) {
+        return strategies.stream()
                 .filter(strategy -> strategy.supports(roleId))
                 .findFirst()
                 .map(RoleStrategy::getRoles)
                 .orElseGet(() -> {
-                    this.logger.warn("Unknown role ID: {}. Returning empty roles list.", roleId);
+                    logger.warn("Unknown role ID: {}. Returning empty roles list.", roleId);
                     return List.of();
                 });
     }

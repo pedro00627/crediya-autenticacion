@@ -76,7 +76,7 @@ class RouterRestTest {
 
     @BeforeEach
     void setUp() {
-        this.userRequest = new UserRequestRecord(
+        userRequest = new UserRequestRecord(
                 "John",
                 "Doe",
                 LocalDate.of(1990, 5, 15),
@@ -88,7 +88,7 @@ class RouterRestTest {
                 "testpassword"
         );
 
-        this.userModel = new User(
+        userModel = new User(
                 "dummy-id",
                 "John",
                 "Doe",
@@ -104,19 +104,19 @@ class RouterRestTest {
 
     @Test
     void saveUserShouldSucceed() {
-        final User savedUser = new User("gen-id-123", this.userModel.firstName(), this.userModel.lastName(), this.userModel.birthDate(), this.userModel.email(), this.userModel.identityDocument(), this.userModel.phone(), this.userModel.roleId(), this.userModel.baseSalary(), "encryptedPassword");
-        final UserResponseRecord response = new UserResponseRecord("gen-id-123", "John", "Doe", LocalDate.of(1990, 5, 15), "john.doe@example.com", "123456789", "3001234567", "1", 50000.0);
+        User savedUser = new User("gen-id-123", userModel.firstName(), userModel.lastName(), userModel.birthDate(), userModel.email(), userModel.identityDocument(), userModel.phone(), userModel.roleId(), userModel.baseSalary(), "encryptedPassword");
+        UserResponseRecord response = new UserResponseRecord("gen-id-123", "John", "Doe", LocalDate.of(1990, 5, 15), "john.doe@example.com", "123456789", "3001234567", "1", 50000.0);
 
-        when(this.validator.validate(any(UserRequestRecord.class))).thenReturn(Collections.emptySet());
-        when(this.userDTOMapper.toModel(any(UserRequestRecord.class))).thenReturn(this.userModel);
-        when(this.passwordEncryptor.encode(any(String.class))).thenReturn("encryptedPassword");
-        when(this.userUseCase.saveUser(any(User.class))).thenReturn(Mono.just(savedUser));
-        when(this.userDTOMapper.toResponse(any(User.class))).thenReturn(response);
+        when(validator.validate(any(UserRequestRecord.class))).thenReturn(Collections.emptySet());
+        when(userDTOMapper.toModel(any(UserRequestRecord.class))).thenReturn(userModel);
+        when(passwordEncryptor.encode(any(String.class))).thenReturn("encryptedPassword");
+        when(userUseCase.saveUser(any(User.class))).thenReturn(Mono.just(savedUser));
+        when(userDTOMapper.toResponse(any(User.class))).thenReturn(response);
 
-        this.webTestClient.post()
+        webTestClient.post()
                 .uri("/api/v1/usuarios")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(this.userRequest)
+                .bodyValue(userRequest)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(UserResponseRecord.class)
@@ -126,18 +126,18 @@ class RouterRestTest {
     @Test
     @SuppressWarnings("unchecked")
     void saveUserShouldFailOnInvalidRequest() {
-        final UserRequestRecord invalidRequest = new UserRequestRecord(null, "Doe", LocalDate.now(), "email", "doc", "phone", "1", 1.0, "");
+        UserRequestRecord invalidRequest = new UserRequestRecord(null, "Doe", LocalDate.now(), "email", "doc", "phone", "1", 1.0, "");
 
-        final ConstraintViolation<UserRequestRecord> violation = mock(ConstraintViolation.class);
-        final Path propertyPath = mock(Path.class);
+        ConstraintViolation<UserRequestRecord> violation = mock(ConstraintViolation.class);
+        Path propertyPath = mock(Path.class);
         when(propertyPath.toString()).thenReturn("firstName");
         when(violation.getPropertyPath()).thenReturn(propertyPath);
         when(violation.getMessage()).thenReturn("El primer nombre no puede estar vacío");
 
-        final Set<ConstraintViolation<UserRequestRecord>> violations = Set.of(violation);
-        when(this.validator.validate(any(UserRequestRecord.class))).thenReturn(violations);
+        Set<ConstraintViolation<UserRequestRecord>> violations = Set.of(violation);
+        when(validator.validate(any(UserRequestRecord.class))).thenReturn(violations);
 
-        this.webTestClient.post()
+        webTestClient.post()
                 .uri("/api/v1/usuarios")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(invalidRequest)
@@ -153,14 +153,14 @@ class RouterRestTest {
     void saveUserShouldFailOnBusinessException() {
         final String errorMessage = "El correo electrónico 'john.doe@example.com' ya se encuentra registrado.";
 
-        when(this.validator.validate(any(UserRequestRecord.class))).thenReturn(Collections.emptySet());
-        when(this.userDTOMapper.toModel(any(UserRequestRecord.class))).thenReturn(this.userModel);
-        when(this.userUseCase.saveUser(any(User.class))).thenReturn(Mono.error(new BusinessException(errorMessage)));
+        when(validator.validate(any(UserRequestRecord.class))).thenReturn(Collections.emptySet());
+        when(userDTOMapper.toModel(any(UserRequestRecord.class))).thenReturn(userModel);
+        when(userUseCase.saveUser(any(User.class))).thenReturn(Mono.error(new BusinessException(errorMessage)));
 
-        this.webTestClient.post()
+        webTestClient.post()
                 .uri("/api/v1/usuarios")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(this.userRequest)
+                .bodyValue(userRequest)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.CONFLICT)
                 .expectBody()

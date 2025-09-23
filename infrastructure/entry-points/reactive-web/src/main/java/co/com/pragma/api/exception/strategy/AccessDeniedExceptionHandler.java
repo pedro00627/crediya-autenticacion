@@ -22,23 +22,23 @@ public class AccessDeniedExceptionHandler implements ExceptionHandlerStrategy {
 
     private final LoggerPort logger;
 
-    public AccessDeniedExceptionHandler(final LoggerPort logger) {
+    public AccessDeniedExceptionHandler(LoggerPort logger) {
         this.logger = logger;
     }
 
     @Override
-    public boolean supports(final Class<? extends Throwable> type) {
+    public boolean supports(Class<? extends Throwable> type) {
         return AccessDeniedException.class.isAssignableFrom(type);
     }
 
     @Override
-    public Mono<ErrorResponseWrapper> handle(final Throwable ex, final ServerWebExchange exchange) {
+    public Mono<ErrorResponseWrapper> handle(Throwable ex, ServerWebExchange exchange) {
         final HttpStatus status = HttpStatus.FORBIDDEN; // 403 para acceso denegado
         final String message = "Acceso denegado. No tiene los permisos necesarios para realizar esta acción.";
 
-        this.logger.warn("Acceso denegado para la petición: {}", ex.getMessage());
+        logger.warn("Acceso denegado para la petición: {}", ex.getMessage());
 
-        final ErrorBody body = new ErrorBody(status.value(), status.getReasonPhrase(), message, null);
+        ErrorBody body = new ErrorBody(status.value(), status.getReasonPhrase(), message, null);
         return Mono.just(new ErrorResponseWrapper(status, body));
     }
 }

@@ -19,42 +19,42 @@ public class SecurityProperties implements JWTProperties {
 
     // Getters y setters para Spring Boot Configuration Properties
     public String getSecret() {
-        return this.secret;
+        return secret;
     }
 
-    public void setSecret(final String secret) {
+    public void setSecret(String secret) {
         this.secret = secret;
     }
 
     public long getExpiration() {
-        return this.expiration;
+        return expiration;
     }
 
-    public void setExpiration(final long expiration) {
+    public void setExpiration(long expiration) {
         this.expiration = expiration;
     }
 
     public List<String> getExcludedPaths() {
-        return this.excludedPaths;
+        return excludedPaths;
     }
 
-    public void setExcludedPaths(final List<String> excludedPaths) {
+    public void setExcludedPaths(List<String> excludedPaths) {
         this.excludedPaths = null != excludedPaths ? excludedPaths : new ArrayList<>();
     }
 
     // Implementación de JWTProperties interface
     @Override
     public String secret() {
-        return this.secret;
+        return secret;
     }
 
     @Override
     public long expiration() {
-        return this.expiration;
+        return expiration;
     }
 
     @Override
     public List<String> excludedPaths() {
-        return this.excludedPaths;
+        return excludedPaths;
     }
 }

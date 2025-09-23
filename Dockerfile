@@ -1,29 +1,37 @@
-# === Imagen base para construcción ===
-FROM gradle:9.0.0-jdk21-jammy AS build
+# === Stage 1: Build microservice ===
+FROM gradle:9.0.0-jdk21-alpine AS build
 WORKDIR /workspace
 
-# Copiar archivos de versiones y Common primero
-COPY common-versions.gradle ./
-COPY Common ./Common
+# Copy only the microservice files
+COPY Autenticacion ./
 
-# Copiar el microservicio
-COPY Autenticacion ./Autenticacion
+# Set GitHub Packages credentials
+ARG GITHUB_ACTOR
+ARG GITHUB_TOKEN
+ENV GITHUB_ACTOR=${GITHUB_ACTOR}
+ENV GITHUB_TOKEN=${GITHUB_TOKEN}
 
-# Construir Common y luego el microservicio en un solo paso
-RUN apt-get update && apt-get install -y dos2unix && \
-    cd Common && chmod +x gradlew && ./gradlew publishToMavenLocal --no-daemon -x test && \
-    cd ../Autenticacion && dos2unix gradlew && chmod +x gradlew && \
-    ./gradlew bootJar --no-daemon -x test
+# Build microservice JAR (will download Common from GitHub Packages)
+RUN cd . && \
+    ./gradlew bootJar --no-daemon --quiet --parallel -x test && \
+    find . -name "*.jar" -not -path "*/build/libs/*" -delete
 
-# === Imagen final optimizada ===
-FROM gcr.io/distroless/java21-debian12
+# === Stage 3: Ultra-minimal runtime ===
+FROM gcr.io/distroless/java21-debian12:nonroot
 WORKDIR /app
 
-# Copiar el JAR generado
-COPY --from=build /workspace/Autenticacion/applications/app-service/build/libs/*.jar ./autenticacion.jar
+# Copy only the final JAR
+COPY --from=build /workspace/applications/app-service/build/libs/*.jar ./autenticacion.jar
 
-# Exponer el puerto correcto
+# Use non-root user for security
+USER nonroot:nonroot
+
+# Optimized JVM settings for containers
 EXPOSE 8080
-
-# Comando de inicio
-ENTRYPOINT ["java", "-jar", "/app/autenticacion.jar"]
+ENTRYPOINT ["java", \
+    "-XX:+UseContainerSupport", \
+    "-XX:MaxRAMPercentage=75.0", \
+    "-XX:+UseG1GC", \
+    "-XX:+UseStringDeduplication", \
+    "-Djava.security.egd=file:/dev/./urandom", \
+    "-jar", "/app/autenticacion.jar"]

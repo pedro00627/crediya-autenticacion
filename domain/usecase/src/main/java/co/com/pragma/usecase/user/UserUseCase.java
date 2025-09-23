@@ -7,24 +7,26 @@ import co.com.pragma.usecase.validation.UserValidator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 public class UserUseCase {
 
     private final UserRepository userRepository;
     private final UserValidator userValidator;
     private final PasswordEncryptor passwordEncryptor;
 
-    public UserUseCase(final UserRepository userRepository, final UserValidator userValidator, final PasswordEncryptor passwordEncryptor) {
+    public UserUseCase(UserRepository userRepository, UserValidator userValidator, PasswordEncryptor passwordEncryptor) {
         this.userRepository = userRepository;
         this.userValidator = userValidator;
         this.passwordEncryptor = passwordEncryptor;
     }
 
-    public Mono<User> saveUser(final User user) {
-        return this.userValidator.validateUser(user)
+    public Mono<User> saveUser(User user) {
+        return userValidator.validateUser(user)
                 .map(userToSave -> {
-                    final String encodedPassword = this.passwordEncryptor.encode(userToSave.password());
+                    String encodedPassword = passwordEncryptor.encode(userToSave.password());
                     return new User(
-                            userToSave.id(),
+                            null, //UUID.randomUUID().toString(),
                             userToSave.firstName(),
                             userToSave.lastName(),
                             userToSave.birthDate(),
@@ -36,14 +38,14 @@ public class UserUseCase {
                             encodedPassword
                     );
                 })
-                .flatMap(this.userRepository::saveUser);
+                .flatMap(userRepository::saveUser);
     }
 
-    public Mono<User> getUserByEmail(final String email) {
-        return this.userRepository.getUserByEmail(email);
+    public Mono<User> getUserByEmail(String email) {
+        return userRepository.getUserByEmail(email);
     }
 
-    public Flux<User> getUserByEmailOrIdentityDocument(final String email, final String identityDocument) {
-        return this.userRepository.getUserByEmailOrIdentityDocument(email, identityDocument);
+    public Flux<User> getUserByEmailOrIdentityDocument(String email, String identityDocument) {
+        return userRepository.getUserByEmailOrIdentityDocument(email, identityDocument);
     }
 }

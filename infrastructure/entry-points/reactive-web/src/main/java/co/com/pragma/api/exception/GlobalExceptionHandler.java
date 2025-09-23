@@ -21,16 +21,16 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
     private final ObjectMapper objectMapper;
     private final List<ExceptionHandlerStrategy> strategies;
 
-    public GlobalExceptionHandler(final LoggerPort logger, final ObjectMapper objectMapper, final List<ExceptionHandlerStrategy> strategies) {
+    public GlobalExceptionHandler(LoggerPort logger, ObjectMapper objectMapper, List<ExceptionHandlerStrategy> strategies) {
         this.logger = logger;
         this.objectMapper = objectMapper;
         this.strategies = strategies;
     }
 
     @Override
-    public Mono<Void> handle(final ServerWebExchange exchange, final Throwable ex) {
+    public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
         // Encuentra la primera estrategia que soporta el tipo de excepción
-        return this.strategies.stream()
+        return strategies.stream()
                 .filter(strategy -> strategy.supports(ex.getClass()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No se encontró un manejador de excepciones por defecto."))
@@ -39,10 +39,10 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
                     exchange.getResponse().setStatusCode(errorWrapper.httpStatus());
                     exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
                     try {
-                        final byte[] bytes = this.objectMapper.writeValueAsBytes(errorWrapper.body());
+                        byte[] bytes = objectMapper.writeValueAsBytes(errorWrapper.body());
                         return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(bytes)));
-                    } catch (final JsonProcessingException e) {
-                        this.logger.error("Error escribiendo la respuesta de error en formato JSON", e);
+                    } catch (JsonProcessingException e) {
+                        logger.error("Error escribiendo la respuesta de error en formato JSON", e);
                         return Mono.error(e);
                     }
                 });

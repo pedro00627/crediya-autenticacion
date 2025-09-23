@@ -66,7 +66,7 @@ class HandlerTest {
 
     @BeforeEach
     void setUp() {
-        this.userRequest = new UserRequestRecord(
+        userRequest = new UserRequestRecord(
                 "John",
                 "Doe",
                 LocalDate.of(1990, 5, 15),
@@ -78,7 +78,7 @@ class HandlerTest {
                 "password123"
         );
 
-        this.userModel = new User(
+        userModel = new User(
                 "1",
                 "John",
                 "Doe",
@@ -91,7 +91,7 @@ class HandlerTest {
                 "hashedPassword"
         );
 
-        this.userResponse = new UserResponseRecord(
+        userResponse = new UserResponseRecord(
                 "1",
                 "John",
                 "Doe",
@@ -107,16 +107,16 @@ class HandlerTest {
     @Test
     void saveUseCaseShouldSucceedWithValidRequest() {
         // Arrange
-        final MockServerRequest request = MockServerRequest.builder()
-                .body(Mono.just(this.userRequest));
+        MockServerRequest request = MockServerRequest.builder()
+                .body(Mono.just(userRequest));
 
-        when(this.validator.validate(any(UserRequestRecord.class))).thenReturn(Collections.emptySet());
-        when(this.mapper.toModel(this.userRequest)).thenReturn(this.userModel);
-        when(this.useCase.saveUser(this.userModel)).thenReturn(Mono.just(this.userModel));
-        when(this.mapper.toResponse(this.userModel)).thenReturn(this.userResponse);
+        when(validator.validate(any(UserRequestRecord.class))).thenReturn(Collections.emptySet());
+        when(mapper.toModel(userRequest)).thenReturn(userModel);
+        when(useCase.saveUser(userModel)).thenReturn(Mono.just(userModel));
+        when(mapper.toResponse(userModel)).thenReturn(userResponse);
 
         // Act
-        final Mono<ServerResponse> result = this.handler.saveUseCase(request);
+        Mono<ServerResponse> result = handler.saveUseCase(request);
 
         // Assert
         StepVerifier.create(result)
@@ -125,20 +125,20 @@ class HandlerTest {
                 })
                 .verifyComplete();
 
-        verify(this.validator).validate(this.userRequest);
-        verify(this.mapper).toModel(this.userRequest);
-        verify(this.useCase).saveUser(this.userModel);
-        verify(this.mapper).toResponse(this.userModel);
+        verify(validator).validate(userRequest);
+        verify(mapper).toModel(userRequest);
+        verify(useCase).saveUser(userModel);
+        verify(mapper).toResponse(userModel);
     }
 
     @Test
     void saveUseCaseShouldFailWithEmptyBody() {
         // Arrange
-        final MockServerRequest request = MockServerRequest.builder()
+        MockServerRequest request = MockServerRequest.builder()
                 .body(Mono.empty());
 
         // Act
-        final Mono<ServerResponse> result = this.handler.saveUseCase(request);
+        Mono<ServerResponse> result = handler.saveUseCase(request);
 
         // Assert
         StepVerifier.create(result)
@@ -150,20 +150,20 @@ class HandlerTest {
     @SuppressWarnings("unchecked")
     void saveUseCaseShouldFailWithValidationErrors() {
         // Arrange
-        final MockServerRequest request = MockServerRequest.builder()
-                .body(Mono.just(this.userRequest));
+        MockServerRequest request = MockServerRequest.builder()
+                .body(Mono.just(userRequest));
 
-        final ConstraintViolation<UserRequestRecord> violation = mock(ConstraintViolation.class);
-        final Path propertyPath = mock(Path.class);
+        ConstraintViolation<UserRequestRecord> violation = mock(ConstraintViolation.class);
+        Path propertyPath = mock(Path.class);
         lenient().when(propertyPath.toString()).thenReturn("firstName");
         lenient().when(violation.getPropertyPath()).thenReturn(propertyPath);
         lenient().when(violation.getMessage()).thenReturn("First name is required");
 
-        final Set<ConstraintViolation<UserRequestRecord>> violations = Set.of(violation);
-        when(this.validator.validate(any(UserRequestRecord.class))).thenReturn(violations);
+        Set<ConstraintViolation<UserRequestRecord>> violations = Set.of(violation);
+        when(validator.validate(any(UserRequestRecord.class))).thenReturn(violations);
 
         // Act
-        final Mono<ServerResponse> result = this.handler.saveUseCase(request);
+        Mono<ServerResponse> result = handler.saveUseCase(request);
 
         // Assert
         StepVerifier.create(result)
@@ -175,16 +175,16 @@ class HandlerTest {
     void getUserByEmailShouldSucceedWithValidEmail() {
         // Arrange
         final String email = "john.doe@example.com";
-        final MockServerRequest request = MockServerRequest.builder()
+        MockServerRequest request = MockServerRequest.builder()
                 .queryParam("email", email)
                 .build();
 
-        when(this.logger.maskEmail(email)).thenReturn("jo***@example.com");
-        when(this.useCase.getUserByEmail(email)).thenReturn(Mono.just(this.userModel));
-        when(this.mapper.toResponse(this.userModel)).thenReturn(this.userResponse);
+        when(logger.maskEmail(email)).thenReturn("jo***@example.com");
+        when(useCase.getUserByEmail(email)).thenReturn(Mono.just(userModel));
+        when(mapper.toResponse(userModel)).thenReturn(userResponse);
 
         // Act
-        final Mono<ServerResponse> result = this.handler.getUserByEmail(request);
+        Mono<ServerResponse> result = handler.getUserByEmail(request);
 
         // Assert
         StepVerifier.create(result)
@@ -193,23 +193,23 @@ class HandlerTest {
                 })
                 .verifyComplete();
 
-        verify(this.useCase).getUserByEmail(email);
-        verify(this.mapper).toResponse(this.userModel);
+        verify(useCase).getUserByEmail(email);
+        verify(mapper).toResponse(userModel);
     }
 
     @Test
     void getUserByEmailShouldReturnNotFoundWhenUserNotExists() {
         // Arrange
         final String email = "nonexistent@example.com";
-        final MockServerRequest request = MockServerRequest.builder()
+        MockServerRequest request = MockServerRequest.builder()
                 .queryParam("email", email)
                 .build();
 
-        when(this.logger.maskEmail(email)).thenReturn("no***@example.com");
-        when(this.useCase.getUserByEmail(email)).thenReturn(Mono.empty());
+        when(logger.maskEmail(email)).thenReturn("no***@example.com");
+        when(useCase.getUserByEmail(email)).thenReturn(Mono.empty());
 
         // Act
-        final Mono<ServerResponse> result = this.handler.getUserByEmail(request);
+        Mono<ServerResponse> result = handler.getUserByEmail(request);
 
         // Assert
         StepVerifier.create(result)
@@ -222,10 +222,10 @@ class HandlerTest {
     @Test
     void getUserByEmailShouldReturnBadRequestWhenEmailMissing() {
         // Arrange
-        final MockServerRequest request = MockServerRequest.builder().build();
+        MockServerRequest request = MockServerRequest.builder().build();
 
         // Act
-        final Mono<ServerResponse> result = this.handler.getUserByEmail(request);
+        Mono<ServerResponse> result = handler.getUserByEmail(request);
 
         // Assert
         StepVerifier.create(result)
@@ -238,21 +238,21 @@ class HandlerTest {
     @ParameterizedTest
     @MethodSource("getUserByEmailOrIdentityDocumentTestCases")
     void getUserByEmailOrIdentityDocumentShouldHandleDifferentScenarios(
-            final Optional<String> email, final Optional<String> identityDocument,
-            final boolean shouldSucceed, final String scenario) {
+            Optional<String> email, Optional<String> identityDocument,
+            boolean shouldSucceed, String scenario) {
         // Arrange
-        final MockServerRequest.Builder requestBuilder = MockServerRequest.builder();
+        MockServerRequest.Builder requestBuilder = MockServerRequest.builder();
         email.ifPresent(e -> requestBuilder.queryParam("email", e));
         identityDocument.ifPresent(doc -> requestBuilder.queryParam("identityDocument", doc));
-        final MockServerRequest request = requestBuilder.build();
+        MockServerRequest request = requestBuilder.build();
 
         if (shouldSucceed) {
-            when(this.useCase.getUserByEmailOrIdentityDocument(email.orElse(null), identityDocument.orElse(null)))
-                    .thenReturn(Flux.just(this.userModel));
+            when(useCase.getUserByEmailOrIdentityDocument(email.orElse(null), identityDocument.orElse(null)))
+                    .thenReturn(Flux.just(userModel));
         }
 
         // Act
-        final Mono<ServerResponse> result = this.handler.getUserByEmailOrIdentityDocument(request);
+        Mono<ServerResponse> result = handler.getUserByEmailOrIdentityDocument(request);
 
         // Assert
         StepVerifier.create(result)
@@ -270,15 +270,15 @@ class HandlerTest {
     void getUserByEmailOrIdentityDocumentShouldReturnUserWhenFound() {
         // Arrange
         final String email = "test@example.com";
-        final MockServerRequest request = MockServerRequest.builder()
+        MockServerRequest request = MockServerRequest.builder()
                 .queryParam("email", email)
                 .build();
 
-        when(this.useCase.getUserByEmailOrIdentityDocument(email, null))
-                .thenReturn(Flux.just(this.userModel));
+        when(useCase.getUserByEmailOrIdentityDocument(email, null))
+                .thenReturn(Flux.just(userModel));
 
         // Act
-        final Mono<ServerResponse> result = this.handler.getUserByEmailOrIdentityDocument(request);
+        Mono<ServerResponse> result = handler.getUserByEmailOrIdentityDocument(request);
 
         // Assert
         StepVerifier.create(result)
@@ -288,27 +288,27 @@ class HandlerTest {
                 })
                 .verifyComplete();
 
-        verify(this.useCase).getUserByEmailOrIdentityDocument(email, null);
+        verify(useCase).getUserByEmailOrIdentityDocument(email, null);
     }
 
     @ParameterizedTest
     @MethodSource("validationTestCases")
-    void saveUseCaseShouldHandleValidationCorrectly(final Set<ConstraintViolation<UserRequestRecord>> violations,
-                                                    final boolean shouldSucceed, final String scenario) {
+    void saveUseCaseShouldHandleValidationCorrectly(Set<ConstraintViolation<UserRequestRecord>> violations,
+                                                    boolean shouldSucceed, String scenario) {
         // Arrange
-        final MockServerRequest request = MockServerRequest.builder()
-                .body(Mono.just(this.userRequest));
+        MockServerRequest request = MockServerRequest.builder()
+                .body(Mono.just(userRequest));
 
-        when(this.validator.validate(any(UserRequestRecord.class))).thenReturn(violations);
+        when(validator.validate(any(UserRequestRecord.class))).thenReturn(violations);
 
         if (shouldSucceed) {
-            when(this.mapper.toModel(this.userRequest)).thenReturn(this.userModel);
-            when(this.useCase.saveUser(this.userModel)).thenReturn(Mono.just(this.userModel));
-            when(this.mapper.toResponse(this.userModel)).thenReturn(this.userResponse);
+            when(mapper.toModel(userRequest)).thenReturn(userModel);
+            when(useCase.saveUser(userModel)).thenReturn(Mono.just(userModel));
+            when(mapper.toResponse(userModel)).thenReturn(userResponse);
         }
 
         // Act
-        final Mono<ServerResponse> result = this.handler.saveUseCase(request);
+        Mono<ServerResponse> result = handler.saveUseCase(request);
 
         // Assert
         if (shouldSucceed) {
@@ -330,18 +330,18 @@ class HandlerTest {
         // Arrange
         final String email = "sensitive@example.com";
         final String maskedEmail = "se***@example.com";
-        final MockServerRequest request = MockServerRequest.builder()
+        MockServerRequest request = MockServerRequest.builder()
                 .queryParam("email", email)
                 .build();
 
-        when(this.logger.maskEmail(email)).thenReturn(maskedEmail);
-        when(this.useCase.getUserByEmail(anyString())).thenReturn(Mono.empty());
+        when(logger.maskEmail(email)).thenReturn(maskedEmail);
+        when(useCase.getUserByEmail(anyString())).thenReturn(Mono.empty());
 
         // Act
-        this.handler.getUserByEmail(request);
+        handler.getUserByEmail(request);
 
         // Assert
-        verify(this.logger).maskEmail(email);
+        verify(logger).maskEmail(email);
         // Note: logger.info is called with logger.maskEmail(email) as parameter,
         // so we verify the important part which is that maskEmail was called
     }
@@ -357,8 +357,8 @@ class HandlerTest {
 
     @SuppressWarnings("unchecked")
     static Stream<Arguments> validationTestCases() {
-        final ConstraintViolation<UserRequestRecord> violation = mock(ConstraintViolation.class);
-        final Path propertyPath = mock(Path.class);
+        ConstraintViolation<UserRequestRecord> violation = mock(ConstraintViolation.class);
+        Path propertyPath = mock(Path.class);
         when(propertyPath.toString()).thenReturn("firstName");
         when(violation.getPropertyPath()).thenReturn(propertyPath);
         when(violation.getMessage()).thenReturn("Error message");

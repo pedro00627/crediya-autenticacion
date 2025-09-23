@@ -58,7 +58,7 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        this.testUser = new User(
+        testUser = new User(
                 "1",
                 "John",
                 "Doe",
@@ -71,22 +71,22 @@ class AuthControllerTest {
                 "hashedPassword"
         );
 
-        this.authRequest = new AuthRequest("john.doe@example.com", "plainPassword");
+        authRequest = new AuthRequest("john.doe@example.com", "plainPassword");
     }
 
     @Test
     void loginShouldSucceedWithValidCredentials() {
         // Arrange
         final String expectedToken = "jwt.token.here";
-        final List<String> roles = List.of("CLIENT");
+        List<String> roles = List.of("CLIENT");
 
-        when(this.userRepository.getUserByEmail(this.authRequest.username())).thenReturn(Mono.just(this.testUser));
-        when(this.passwordEncryptor.matches(this.authRequest.password(), this.testUser.password())).thenReturn(true);
-        when(this.roleStrategyContext.getRolesForUser(this.testUser.roleId())).thenReturn(roles);
-        when(this.jwtUtil.generateToken(this.testUser.email(), roles)).thenReturn(expectedToken);
+        when(userRepository.getUserByEmail(authRequest.username())).thenReturn(Mono.just(testUser));
+        when(passwordEncryptor.matches(authRequest.password(), testUser.password())).thenReturn(true);
+        when(roleStrategyContext.getRolesForUser(testUser.roleId())).thenReturn(roles);
+        when(jwtUtil.generateToken(testUser.email(), roles)).thenReturn(expectedToken);
 
         // Act
-        final Mono<ResponseEntity<Map<String, String>>> result = this.authController.login(this.authRequest);
+        Mono<ResponseEntity<Map<String, String>>> result = authController.login(authRequest);
 
         // Assert
         StepVerifier.create(result)
@@ -96,20 +96,20 @@ class AuthControllerTest {
                 })
                 .verifyComplete();
 
-        verify(this.userRepository).getUserByEmail(this.authRequest.username());
-        verify(this.passwordEncryptor).matches(this.authRequest.password(), this.testUser.password());
-        verify(this.roleStrategyContext).getRolesForUser(this.testUser.roleId());
-        verify(this.jwtUtil).generateToken(this.testUser.email(), roles);
+        verify(userRepository).getUserByEmail(authRequest.username());
+        verify(passwordEncryptor).matches(authRequest.password(), testUser.password());
+        verify(roleStrategyContext).getRolesForUser(testUser.roleId());
+        verify(jwtUtil).generateToken(testUser.email(), roles);
     }
 
     @Test
     void loginShouldFailWithInvalidPassword() {
         // Arrange
-        when(this.userRepository.getUserByEmail(this.authRequest.username())).thenReturn(Mono.just(this.testUser));
-        when(this.passwordEncryptor.matches(this.authRequest.password(), this.testUser.password())).thenReturn(false);
+        when(userRepository.getUserByEmail(authRequest.username())).thenReturn(Mono.just(testUser));
+        when(passwordEncryptor.matches(authRequest.password(), testUser.password())).thenReturn(false);
 
         // Act
-        final Mono<ResponseEntity<Map<String, String>>> result = this.authController.login(this.authRequest);
+        Mono<ResponseEntity<Map<String, String>>> result = authController.login(authRequest);
 
         // Assert
         StepVerifier.create(result)
@@ -123,10 +123,10 @@ class AuthControllerTest {
     @Test
     void loginShouldFailWithUserNotFound() {
         // Arrange
-        when(this.userRepository.getUserByEmail(this.authRequest.username())).thenReturn(Mono.empty());
+        when(userRepository.getUserByEmail(authRequest.username())).thenReturn(Mono.empty());
 
         // Act
-        final Mono<ResponseEntity<Map<String, String>>> result = this.authController.login(this.authRequest);
+        Mono<ResponseEntity<Map<String, String>>> result = authController.login(authRequest);
 
         // Assert
         StepVerifier.create(result)
@@ -140,11 +140,11 @@ class AuthControllerTest {
     @Test
     void loginShouldHandleRepositoryError() {
         // Arrange
-        final RuntimeException repositoryError = new RuntimeException("Database connection failed");
-        when(this.userRepository.getUserByEmail(this.authRequest.username())).thenReturn(Mono.error(repositoryError));
+        RuntimeException repositoryError = new RuntimeException("Database connection failed");
+        when(userRepository.getUserByEmail(authRequest.username())).thenReturn(Mono.error(repositoryError));
 
         // Act
-        final Mono<ResponseEntity<Map<String, String>>> result = this.authController.login(this.authRequest);
+        Mono<ResponseEntity<Map<String, String>>> result = authController.login(authRequest);
 
         // Assert
         StepVerifier.create(result)
@@ -157,21 +157,21 @@ class AuthControllerTest {
 
     @ParameterizedTest
     @MethodSource("roleTestCases")
-    void loginShouldHandleDifferentRoles(final Integer roleId, final List<String> expectedRoles, final String scenario) {
+    void loginShouldHandleDifferentRoles(Integer roleId, List<String> expectedRoles, String scenario) {
         // Arrange
-        final User userWithRole = new User("1", "Test", "User", LocalDate.now(),
+        User userWithRole = new User("1", "Test", "User", LocalDate.now(),
                                    "test@example.com", "123456789", "3001234567",
                                    roleId, 50000.0, "hashedPassword");
-        final AuthRequest request = new AuthRequest("test@example.com", "password");
+        AuthRequest request = new AuthRequest("test@example.com", "password");
         final String expectedToken = "jwt.token.here";
 
-        when(this.userRepository.getUserByEmail(request.username())).thenReturn(Mono.just(userWithRole));
-        when(this.passwordEncryptor.matches(request.password(), userWithRole.password())).thenReturn(true);
-        when(this.roleStrategyContext.getRolesForUser(roleId)).thenReturn(expectedRoles);
-        when(this.jwtUtil.generateToken(userWithRole.email(), expectedRoles)).thenReturn(expectedToken);
+        when(userRepository.getUserByEmail(request.username())).thenReturn(Mono.just(userWithRole));
+        when(passwordEncryptor.matches(request.password(), userWithRole.password())).thenReturn(true);
+        when(roleStrategyContext.getRolesForUser(roleId)).thenReturn(expectedRoles);
+        when(jwtUtil.generateToken(userWithRole.email(), expectedRoles)).thenReturn(expectedToken);
 
         // Act
-        final Mono<ResponseEntity<Map<String, String>>> result = this.authController.login(request);
+        Mono<ResponseEntity<Map<String, String>>> result = authController.login(request);
 
         // Assert
         StepVerifier.create(result)
@@ -181,25 +181,25 @@ class AuthControllerTest {
                 })
                 .verifyComplete();
 
-        verify(this.roleStrategyContext).getRolesForUser(roleId);
+        verify(roleStrategyContext).getRolesForUser(roleId);
     }
 
     @Test
     void loginShouldHandleNullRoleId() {
         // Arrange
-        final User userWithNullRole = new User("1", "Test", "User", LocalDate.now(),
+        User userWithNullRole = new User("1", "Test", "User", LocalDate.now(),
                                        "test@example.com", "123456789", "3001234567",
                                        null, 50000.0, "hashedPassword");
-        final AuthRequest request = new AuthRequest("test@example.com", "password");
+        AuthRequest request = new AuthRequest("test@example.com", "password");
         final String expectedToken = "jwt.token.here";
-        final List<String> emptyRoles = List.of();
+        List<String> emptyRoles = List.of();
 
-        when(this.userRepository.getUserByEmail(request.username())).thenReturn(Mono.just(userWithNullRole));
-        when(this.passwordEncryptor.matches(request.password(), userWithNullRole.password())).thenReturn(true);
-        when(this.jwtUtil.generateToken(userWithNullRole.email(), emptyRoles)).thenReturn(expectedToken);
+        when(userRepository.getUserByEmail(request.username())).thenReturn(Mono.just(userWithNullRole));
+        when(passwordEncryptor.matches(request.password(), userWithNullRole.password())).thenReturn(true);
+        when(jwtUtil.generateToken(userWithNullRole.email(), emptyRoles)).thenReturn(expectedToken);
 
         // Act
-        final Mono<ResponseEntity<Map<String, String>>> result = this.authController.login(request);
+        Mono<ResponseEntity<Map<String, String>>> result = authController.login(request);
 
         // Assert
         StepVerifier.create(result)
@@ -211,32 +211,32 @@ class AuthControllerTest {
 
         // Note: roleStrategyContext.getRolesForUser(null) is NOT called because
         // the controller handles null roleId directly by returning empty list
-        verify(this.userRepository).getUserByEmail(request.username());
-        verify(this.passwordEncryptor).matches(request.password(), userWithNullRole.password());
-        verify(this.jwtUtil).generateToken(userWithNullRole.email(), emptyRoles);
+        verify(userRepository).getUserByEmail(request.username());
+        verify(passwordEncryptor).matches(request.password(), userWithNullRole.password());
+        verify(jwtUtil).generateToken(userWithNullRole.email(), emptyRoles);
     }
 
     @ParameterizedTest
     @MethodSource("authRequestTestCases")
-    void loginShouldHandleDifferentAuthRequests(final String username, final String password,
-                                                final boolean userExists, final boolean passwordMatches,
-                                                final HttpStatus expectedStatus, final String scenario) {
+    void loginShouldHandleDifferentAuthRequests(String username, String password,
+                                                boolean userExists, boolean passwordMatches,
+                                                HttpStatus expectedStatus, String scenario) {
         // Arrange
-        final AuthRequest request = new AuthRequest(username, password);
+        AuthRequest request = new AuthRequest(username, password);
 
         if (userExists) {
-            when(this.userRepository.getUserByEmail(username)).thenReturn(Mono.just(this.testUser));
-            when(this.passwordEncryptor.matches(password, this.testUser.password())).thenReturn(passwordMatches);
+            when(userRepository.getUserByEmail(username)).thenReturn(Mono.just(testUser));
+            when(passwordEncryptor.matches(password, testUser.password())).thenReturn(passwordMatches);
             if (passwordMatches) {
-                when(this.roleStrategyContext.getRolesForUser(any())).thenReturn(List.of("CLIENT"));
-                when(this.jwtUtil.generateToken(anyString(), any())).thenReturn("token");
+                when(roleStrategyContext.getRolesForUser(any())).thenReturn(List.of("CLIENT"));
+                when(jwtUtil.generateToken(anyString(), any())).thenReturn("token");
             }
         } else {
-            when(this.userRepository.getUserByEmail(username)).thenReturn(Mono.empty());
+            when(userRepository.getUserByEmail(username)).thenReturn(Mono.empty());
         }
 
         // Act
-        final Mono<ResponseEntity<Map<String, String>>> result = this.authController.login(request);
+        Mono<ResponseEntity<Map<String, String>>> result = authController.login(request);
 
         // Assert
         StepVerifier.create(result)

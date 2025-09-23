@@ -24,12 +24,12 @@ public class Router {
     @Bean
     @RouterOperations(
             {
-                    @RouterOperation(path = ApiConstants.USERS_ENDPOINT, produces = HttpConstants.APPLICATION_JSON, method = RequestMethod.POST, beanClass = Handler.class, beanMethod = Router.SAVE_USE_CASE),
-                    @RouterOperation(path = ApiConstants.USERS_ENDPOINT, produces = HttpConstants.APPLICATION_JSON, method = RequestMethod.GET, beanClass = Handler.class, beanMethod = Router.GET_USER_BY_EMAIL)
+                    @RouterOperation(path = ApiConstants.USERS_ENDPOINT, produces = HttpConstants.APPLICATION_JSON, method = RequestMethod.POST, beanClass = Handler.class, beanMethod = SAVE_USE_CASE),
+                    @RouterOperation(path = ApiConstants.USERS_ENDPOINT, produces = HttpConstants.APPLICATION_JSON, method = RequestMethod.GET, beanClass = Handler.class, beanMethod = GET_USER_BY_EMAIL)
             }
 
     )
-    public RouterFunction<ServerResponse> userRoutes(final Handler handler) {
+    public RouterFunction<ServerResponse> userRoutes(Handler handler) {
         return route(POST(ApiConstants.USERS_ENDPOINT), handler::saveUseCase)
                 .and(route(GET(ApiConstants.USERS_ENDPOINT), handler::getUserByEmail))
                 .andRoute(GET(ApiConstants.USERS_SEARCH_ENDPOINT), handler::getUserByEmailOrIdentityDocument);

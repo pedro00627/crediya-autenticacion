@@ -12,8 +12,8 @@ class ObjectMapperConfigTest {
 
     @Test
     void testObjectMapperBean() {
-        final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ObjectMapperConfig.class);
-        final ObjectMapper objectMapper = context.getBean(ObjectMapper.class);
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ObjectMapperConfig.class);
+        ObjectMapper objectMapper = context.getBean(ObjectMapper.class);
         assertNotNull(objectMapper);
         assertInstanceOf(ObjectMapperImp.class, objectMapper);
         context.close();

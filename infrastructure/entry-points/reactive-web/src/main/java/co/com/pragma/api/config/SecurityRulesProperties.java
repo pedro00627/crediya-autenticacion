@@ -13,15 +13,15 @@ public class SecurityRulesProperties implements SecurityRulesProvider {
     private List<AuthorizationRule> authorization = new ArrayList<>();
 
     public List<AuthorizationRule> getAuthorization() {
-        return this.authorization;
+        return authorization;
     }
 
-    public void setAuthorization(final List<AuthorizationRule> authorization) {
+    public void setAuthorization(List<AuthorizationRule> authorization) {
         this.authorization = authorization;
     }
 
     @Override
     public List<AuthorizationRule> authorization() {
-        return this.authorization;
+        return authorization;
     }
 }

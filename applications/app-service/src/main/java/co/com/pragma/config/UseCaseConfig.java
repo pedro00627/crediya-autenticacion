@@ -11,12 +11,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class UseCaseConfig {
     @Bean
-    public UserValidator userValidator(final UserRepository userRepository, final RoleRepository roleRepository) {
+    public UserValidator userValidator(UserRepository userRepository, RoleRepository roleRepository) {
         return new UserValidator(userRepository, roleRepository);
     }
 
     @Bean
-    public UserUseCase userUseCase(final UserRepository userRepository, final UserValidator userValidator, final PasswordEncryptor passwordEncryptor) {
+    public UserUseCase userUseCase(UserRepository userRepository, UserValidator userValidator, PasswordEncryptor passwordEncryptor) {
         return new UserUseCase(userRepository, userValidator, passwordEncryptor);
     }
 }

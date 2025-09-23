@@ -25,40 +25,40 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     private final TransactionalOperator transactionalOperator;
     private final UserDataMapper userDataMapper;
 
-    public UserReactiveRepositoryAdapter(final UserReactiveRepository repository, final ObjectMapper mapper, final LoggerPort logger, final TransactionalOperator transactional, final UserDataMapper userDataMapper) {
+    public UserReactiveRepositoryAdapter(UserReactiveRepository repository, ObjectMapper mapper, LoggerPort logger, TransactionalOperator transactional, UserDataMapper userDataMapper) {
         super(logger, repository, mapper, userDataMapper::toDomain);
         this.logger = logger;
-        transactionalOperator = transactional;
+        this.transactionalOperator = transactional;
         this.userDataMapper = userDataMapper;
     }
 
     @Override
-    public Mono<User> saveUser(final User user) {
-        final UserEntity userEntity = this.userDataMapper.toEntity(user);
-        return this.repository.save(userEntity)
-                .doOnSubscribe(subscription -> this.logger.info("Guardando usuario en la base de datos con email: {}", this.logger.maskEmail(user.email())))
-                .map(this.userDataMapper::toDomain) // Map the saved entity back to the domain model
-                .doOnSuccess(savedUser -> this.logger.info("Usuario guardado exitosamente en BD con ID: {}", savedUser.id()))
+    public Mono<User> saveUser(User user) {
+        UserEntity userEntity = userDataMapper.toEntity(user);
+        return repository.save(userEntity)
+                .doOnSubscribe(subscription -> logger.info("Guardando usuario en la base de datos con email: {}", logger.maskEmail(user.email())))
+                .map(userDataMapper::toDomain) // Map the saved entity back to the domain model
+                .doOnSuccess(savedUser -> logger.info("Usuario guardado exitosamente en BD con ID: {}", savedUser.id()))
                 // Añadimos un log específico para el caso de error durante el guardado
-                .doOnError(error -> this.logger.error("Error al guardar el usuario", error))
-                .as(this.transactionalOperator::transactional);
+                .doOnError(error -> logger.error("Error al guardar el usuario", error))
+                .as(transactionalOperator::transactional);
     }
 
     @Override
-    public Mono<Boolean> existByEmail(final String email) {
-        this.logger.debug("Verificando existencia de email en BD: {}", this.logger.maskEmail(email));
-        return this.repository.existsByEmail(email);
+    public Mono<Boolean> existByEmail(String email) {
+        logger.debug("Verificando existencia de email en BD: {}", logger.maskEmail(email));
+        return repository.existsByEmail(email);
     }
 
     @Override
-    public Mono<User> getUserByEmail(final String email) {
-        this.logger.debug("Buscando usuario por email en BD: {}", this.logger.maskEmail(email));
-        return this.repository.findByEmail(email);
+    public Mono<User> getUserByEmail(String email) {
+        logger.debug("Buscando usuario por email en BD: {}", logger.maskEmail(email));
+        return repository.findByEmail(email);
     }
 
-    public Flux<User> getUserByEmailOrIdentityDocument(final String email, final String identityDocument) {
-        this.logger.debug("Buscando usuario por email o documento de identidad en BD: {} - {}", this.logger.maskEmail(email), identityDocument);
-        return this.repository.findByEmailOrIdentityDocument(email, identityDocument);
+    public Flux<User> getUserByEmailOrIdentityDocument(String email, String identityDocument) {
+        logger.debug("Buscando usuario por email o documento de identidad en BD: {} - {}", logger.maskEmail(email), identityDocument);
+        return repository.findByEmailOrIdentityDocument(email, identityDocument);
     }
 
 }

@@ -16,21 +16,21 @@ public class BusinessExceptionHandler implements ExceptionHandlerStrategy {
 
     private final LoggerPort logger;
 
-    public BusinessExceptionHandler(final LoggerPort logger) {
+    public BusinessExceptionHandler(LoggerPort logger) {
         this.logger = logger;
     }
 
     @Override
-    public boolean supports(final Class<? extends Throwable> type) {
+    public boolean supports(Class<? extends Throwable> type) {
         return BusinessException.class.isAssignableFrom(type);
     }
 
     @Override
-    public Mono<ErrorResponseWrapper> handle(final Throwable ex, final ServerWebExchange exchange) {
+    public Mono<ErrorResponseWrapper> handle(Throwable ex, ServerWebExchange exchange) {
         final HttpStatus status = HttpStatus.CONFLICT;
-        this.logger.error("Violación de regla de negocio para la petición [{}]: {}", ex);
+        logger.error("Violación de regla de negocio para la petición [{}]: {}", ex);
 
-        final ErrorBody body = new ErrorBody(status.value(), "Business Rule Violation", ex.getMessage(), null);
+        ErrorBody body = new ErrorBody(status.value(), "Business Rule Violation", ex.getMessage(), null);
 
         return Mono.just(new ErrorResponseWrapper(status, body));
     }

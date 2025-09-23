@@ -13,7 +13,7 @@ import java.util.List;
 public class AdvisorRoleStrategy implements RoleStrategy {
 
     @Override
-    public boolean supports(final Integer roleId) {
+    public boolean supports(Integer roleId) {
         return BusinessConstants.ADVISOR_ROLE_ID.equals(roleId);
     }
 

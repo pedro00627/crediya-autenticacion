@@ -11,21 +11,13 @@ import java.util.Set;
 public class InvalidRequestException extends RuntimeException {
     private final Set<? extends ConstraintViolation<?>> violations;
 
-    public InvalidRequestException(final String message, final Set<? extends ConstraintViolation<?>> violations) {
+    public InvalidRequestException(String message, Set<? extends ConstraintViolation<?>> violations) {
         super(message);
         this.violations = violations;
     }
 
-    public InvalidRequestException(final Set<? extends ConstraintViolation<?>> violations) {
-        this("Invalid request due to validation errors.", violations);
-    }
-
-    public InvalidRequestException(final String message, final Throwable cause, final Set<? extends ConstraintViolation<?>> violations) {
-        super(message, cause);
-        this.violations = violations;
-    }
 
     public Set<? extends ConstraintViolation<?>> getViolations() {
-        return this.violations;
+        return violations;
     }
 }

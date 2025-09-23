@@ -42,18 +42,18 @@ class UserAuthorizationLogicTest {
 
     @BeforeEach
     void setUp() {
-        this.authorizationLogic = new UserAuthorizationLogic(this.logger);
+        authorizationLogic = new UserAuthorizationLogic(logger);
     }
 
     @Test
     void shouldGrantAccessToAdminUser() {
         // Arrange
-        final Authentication authentication = this.createAuthentication("admin@example.com", true,
+        Authentication authentication = createAuthentication("admin@example.com", true,
                 List.of(new SimpleGrantedAuthority(RoleConstants.ADMIN)));
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users?email=client@example.com");
+        AuthorizationContext context = createAuthorizationContext("/api/users?email=client@example.com");
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.just(authentication), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.just(authentication), context);
 
         // Assert
         StepVerifier.create(result)
@@ -67,12 +67,12 @@ class UserAuthorizationLogicTest {
     @Test
     void shouldGrantAccessToAdvisorUser() {
         // Arrange
-        final Authentication authentication = this.createAuthentication("advisor@example.com", true,
+        Authentication authentication = createAuthentication("advisor@example.com", true,
                 List.of(new SimpleGrantedAuthority(RoleConstants.ADVISOR)));
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users?email=client@example.com");
+        AuthorizationContext context = createAuthorizationContext("/api/users?email=client@example.com");
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.just(authentication), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.just(authentication), context);
 
         // Assert
         StepVerifier.create(result)
@@ -87,12 +87,12 @@ class UserAuthorizationLogicTest {
     void shouldGrantAccessToClientForOwnData() {
         // Arrange
         final String userEmail = "client@example.com";
-        final Authentication authentication = this.createAuthentication(userEmail, true,
+        Authentication authentication = createAuthentication(userEmail, true,
                 List.of(new SimpleGrantedAuthority(RoleConstants.CLIENT)));
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users?email=" + userEmail);
+        AuthorizationContext context = createAuthorizationContext("/api/users?email=" + userEmail);
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.just(authentication), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.just(authentication), context);
 
         // Assert
         StepVerifier.create(result)
@@ -108,12 +108,12 @@ class UserAuthorizationLogicTest {
         // Arrange
         final String authenticatedEmail = "client1@example.com";
         final String requestedEmail = "client2@example.com";
-        final Authentication authentication = this.createAuthentication(authenticatedEmail, true,
+        Authentication authentication = createAuthentication(authenticatedEmail, true,
                 List.of(new SimpleGrantedAuthority(RoleConstants.CLIENT)));
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users?email=" + requestedEmail);
+        AuthorizationContext context = createAuthorizationContext("/api/users?email=" + requestedEmail);
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.just(authentication), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.just(authentication), context);
 
         // Assert
         StepVerifier.create(result)
@@ -127,12 +127,12 @@ class UserAuthorizationLogicTest {
     @Test
     void shouldDenyAccessForUnauthenticatedUser() {
         // Arrange
-        final Authentication authentication = this.createAuthentication("user@example.com", false,
+        Authentication authentication = createAuthentication("user@example.com", false,
                 List.of(new SimpleGrantedAuthority(RoleConstants.CLIENT)));
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users?email=user@example.com");
+        AuthorizationContext context = createAuthorizationContext("/api/users?email=user@example.com");
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.just(authentication), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.just(authentication), context);
 
         // Assert
         StepVerifier.create(result)
@@ -146,12 +146,12 @@ class UserAuthorizationLogicTest {
     @Test
     void shouldDenyAccessForUserWithUnknownRole() {
         // Arrange
-        final Authentication authentication = this.createAuthentication("unknown@example.com", true,
+        Authentication authentication = createAuthentication("unknown@example.com", true,
                 List.of(new SimpleGrantedAuthority("UNKNOWN_ROLE")));
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users?email=unknown@example.com");
+        AuthorizationContext context = createAuthorizationContext("/api/users?email=unknown@example.com");
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.just(authentication), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.just(authentication), context);
 
         // Assert
         StepVerifier.create(result)
@@ -165,10 +165,10 @@ class UserAuthorizationLogicTest {
     @Test
     void shouldDenyAccessForEmptyAuthentication() {
         // Arrange
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users?email=test@example.com");
+        AuthorizationContext context = createAuthorizationContext("/api/users?email=test@example.com");
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.empty(), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.empty(), context);
 
         // Assert
         StepVerifier.create(result)
@@ -181,14 +181,14 @@ class UserAuthorizationLogicTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"ROLE_ADMIN", "ADMIN", "ROLE_ADVISOR", "ADVISOR"})
-    void shouldGrantAccessForAdminOrAdvisorRoles(final String roleAuthority) {
+    void shouldGrantAccessForAdminOrAdvisorRoles(String roleAuthority) {
         // Arrange
-        final Authentication authentication = this.createAuthentication("privileged@example.com", true,
+        Authentication authentication = createAuthentication("privileged@example.com", true,
                 List.of(new SimpleGrantedAuthority(roleAuthority)));
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users?email=anyone@example.com");
+        AuthorizationContext context = createAuthorizationContext("/api/users?email=anyone@example.com");
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.just(authentication), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.just(authentication), context);
 
         // Assert
         StepVerifier.create(result)
@@ -201,15 +201,15 @@ class UserAuthorizationLogicTest {
 
     @ParameterizedTest
     @MethodSource("clientAccessTestCases")
-    void shouldHandleClientAccessCorrectly(final String authenticatedEmail, final String requestedEmail,
-                                           final boolean expectedAccess, final String scenario) {
+    void shouldHandleClientAccessCorrectly(String authenticatedEmail, String requestedEmail,
+                                           boolean expectedAccess, String scenario) {
         // Arrange
-        final Authentication authentication = this.createAuthentication(authenticatedEmail, true,
+        Authentication authentication = createAuthentication(authenticatedEmail, true,
                 List.of(new SimpleGrantedAuthority(RoleConstants.CLIENT)));
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users?email=" + requestedEmail);
+        AuthorizationContext context = createAuthorizationContext("/api/users?email=" + requestedEmail);
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.just(authentication), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.just(authentication), context);
 
         // Assert
         StepVerifier.create(result)
@@ -227,15 +227,15 @@ class UserAuthorizationLogicTest {
     @Test
     void shouldHandleMultipleRoles() {
         // Arrange - User with both CLIENT and ADMIN roles (ADMIN should take precedence)
-        final Authentication authentication = this.createAuthentication("multiRole@example.com", true,
+        Authentication authentication = createAuthentication("multiRole@example.com", true,
                 List.of(
                     new SimpleGrantedAuthority(RoleConstants.CLIENT),
                     new SimpleGrantedAuthority(RoleConstants.ADMIN)
                 ));
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users?email=other@example.com");
+        AuthorizationContext context = createAuthorizationContext("/api/users?email=other@example.com");
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.just(authentication), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.just(authentication), context);
 
         // Assert
         StepVerifier.create(result)
@@ -251,12 +251,12 @@ class UserAuthorizationLogicTest {
         // Arrange
         final String authenticatedEmail = "Client@Example.Com";
         final String requestedEmail = "client@example.com";
-        final Authentication authentication = this.createAuthentication(authenticatedEmail, true,
+        Authentication authentication = createAuthentication(authenticatedEmail, true,
                 List.of(new SimpleGrantedAuthority(RoleConstants.CLIENT)));
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users?email=" + requestedEmail);
+        AuthorizationContext context = createAuthorizationContext("/api/users?email=" + requestedEmail);
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.just(authentication), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.just(authentication), context);
 
         // Assert
         StepVerifier.create(result)
@@ -270,12 +270,12 @@ class UserAuthorizationLogicTest {
     @Test
     void shouldHandleRequestWithoutEmailParameter() {
         // Arrange
-        final Authentication authentication = this.createAuthentication("client@example.com", true,
+        Authentication authentication = createAuthentication("client@example.com", true,
                 List.of(new SimpleGrantedAuthority(RoleConstants.CLIENT)));
-        final AuthorizationContext context = this.createAuthorizationContext("/api/users");
+        AuthorizationContext context = createAuthorizationContext("/api/users");
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationLogic.authorize(Mono.just(authentication), context);
+        Mono<AuthorizationDecision> result = authorizationLogic.authorize(Mono.just(authentication), context);
 
         // Assert
         StepVerifier.create(result)
@@ -288,19 +288,19 @@ class UserAuthorizationLogicTest {
 
     // Helper methods
     @SuppressWarnings("unchecked")
-    private Authentication createAuthentication(final String name, final boolean isAuthenticated,
-                                                final Collection<GrantedAuthority> authorities) {
-        final Authentication authentication = mock(Authentication.class);
+    private Authentication createAuthentication(String name, boolean isAuthenticated,
+                                                Collection<GrantedAuthority> authorities) {
+        Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn(name);
         when(authentication.isAuthenticated()).thenReturn(isAuthenticated);
         when(authentication.getAuthorities()).thenReturn((Collection) authorities);
         return authentication;
     }
 
-    private AuthorizationContext createAuthorizationContext(final String uri) {
-        final MockServerHttpRequest request = MockServerHttpRequest.get(uri).build();
-        final MockServerWebExchange exchange = MockServerWebExchange.from(request);
-        final AuthorizationContext context = mock(AuthorizationContext.class);
+    private AuthorizationContext createAuthorizationContext(String uri) {
+        MockServerHttpRequest request = MockServerHttpRequest.get(uri).build();
+        MockServerWebExchange exchange = MockServerWebExchange.from(request);
+        AuthorizationContext context = mock(AuthorizationContext.class);
         lenient().when(context.getExchange()).thenReturn(exchange);
         return context;
     }

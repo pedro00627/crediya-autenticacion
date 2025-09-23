@@ -31,7 +31,7 @@ class BCryptPasswordEncryptorTest {
 
     @BeforeEach
     void setUp() {
-        this.passwordEncryptor = new BCryptPasswordEncryptor(this.passwordEncoder);
+        passwordEncryptor = new BCryptPasswordEncryptor(passwordEncoder);
     }
 
     @Test
@@ -39,14 +39,14 @@ class BCryptPasswordEncryptorTest {
         // Arrange
         final String rawPassword = "testPassword123";
         final String encodedPassword = "$2a$10$hashedPassword";
-        when(this.passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
+        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedPassword);
 
         // Act
-        final String result = this.passwordEncryptor.encode(rawPassword);
+        String result = passwordEncryptor.encode(rawPassword);
 
         // Assert
         assertEquals(encodedPassword, result);
-        verify(this.passwordEncoder).encode(rawPassword);
+        verify(passwordEncoder).encode(rawPassword);
     }
 
     @Test
@@ -54,14 +54,14 @@ class BCryptPasswordEncryptorTest {
         // Arrange
         final String rawPassword = "testPassword123";
         final String encodedPassword = "$2a$10$hashedPassword";
-        when(this.passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
+        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
 
         // Act
-        final boolean result = this.passwordEncryptor.matches(rawPassword, encodedPassword);
+        boolean result = passwordEncryptor.matches(rawPassword, encodedPassword);
 
         // Assert
         assertTrue(result);
-        verify(this.passwordEncoder).matches(rawPassword, encodedPassword);
+        verify(passwordEncoder).matches(rawPassword, encodedPassword);
     }
 
     @Test
@@ -69,14 +69,14 @@ class BCryptPasswordEncryptorTest {
         // Arrange
         final String rawPassword = "wrongPassword";
         final String encodedPassword = "$2a$10$hashedPassword";
-        when(this.passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(false);
+        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(false);
 
         // Act
-        final boolean result = this.passwordEncryptor.matches(rawPassword, encodedPassword);
+        boolean result = passwordEncryptor.matches(rawPassword, encodedPassword);
 
         // Assert
         assertFalse(result);
-        verify(this.passwordEncoder).matches(rawPassword, encodedPassword);
+        verify(passwordEncoder).matches(rawPassword, encodedPassword);
     }
 
     @ParameterizedTest
@@ -91,44 +91,44 @@ class BCryptPasswordEncryptorTest {
             " ",
             "   spaces   "
     })
-    void shouldEncodeVariousPasswords(final String rawPassword) {
+    void shouldEncodeVariousPasswords(String rawPassword) {
         // Arrange
-        final String expectedEncoded = "$2a$10$encoded_" + rawPassword.hashCode();
-        when(this.passwordEncoder.encode(rawPassword)).thenReturn(expectedEncoded);
+        String expectedEncoded = "$2a$10$encoded_" + rawPassword.hashCode();
+        when(passwordEncoder.encode(rawPassword)).thenReturn(expectedEncoded);
 
         // Act
-        final String result = this.passwordEncryptor.encode(rawPassword);
+        String result = passwordEncryptor.encode(rawPassword);
 
         // Assert
         assertNotNull(result);
         assertEquals(expectedEncoded, result);
-        verify(this.passwordEncoder).encode(rawPassword);
+        verify(passwordEncoder).encode(rawPassword);
     }
 
     @ParameterizedTest
     @MethodSource("passwordMatchingTestCases")
-    void shouldValidatePasswordMatching(final String rawPassword, final String encodedPassword,
-                                        final boolean shouldMatch, final String scenario) {
+    void shouldValidatePasswordMatching(String rawPassword, String encodedPassword,
+                                        boolean shouldMatch, String scenario) {
         // Arrange
-        when(this.passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(shouldMatch);
+        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(shouldMatch);
 
         // Act
-        final boolean result = this.passwordEncryptor.matches(rawPassword, encodedPassword);
+        boolean result = passwordEncryptor.matches(rawPassword, encodedPassword);
 
         // Assert
         assertEquals(shouldMatch, result, scenario);
-        verify(this.passwordEncoder).matches(rawPassword, encodedPassword);
+        verify(passwordEncoder).matches(rawPassword, encodedPassword);
     }
 
     @ParameterizedTest
     @MethodSource("edgeCaseTestCases")
-    void shouldHandleEdgeCases(final String rawPassword, final String encodedPassword,
-                               final boolean expectedMatch, final String scenario) {
+    void shouldHandleEdgeCases(String rawPassword, String encodedPassword,
+                               boolean expectedMatch, String scenario) {
         // Arrange
-        when(this.passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(expectedMatch);
+        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(expectedMatch);
 
         // Act
-        final boolean result = this.passwordEncryptor.matches(rawPassword, encodedPassword);
+        boolean result = passwordEncryptor.matches(rawPassword, encodedPassword);
 
         // Assert
         assertEquals(expectedMatch, result, scenario);
@@ -141,14 +141,14 @@ class BCryptPasswordEncryptorTest {
         final String encodedPassword = "$2a$10$hashedPassword";
 
         // Test encode
-        when(this.passwordEncoder.encode(anyString())).thenReturn(encodedPassword);
-        this.passwordEncryptor.encode(rawPassword);
-        verify(this.passwordEncoder).encode(rawPassword);
+        when(passwordEncoder.encode(anyString())).thenReturn(encodedPassword);
+        passwordEncryptor.encode(rawPassword);
+        verify(passwordEncoder).encode(rawPassword);
 
         // Test matches
-        when(this.passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-        this.passwordEncryptor.matches(rawPassword, encodedPassword);
-        verify(this.passwordEncoder).matches(rawPassword, encodedPassword);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+        passwordEncryptor.matches(rawPassword, encodedPassword);
+        verify(passwordEncoder).matches(rawPassword, encodedPassword);
     }
 
     static Stream<Arguments> passwordMatchingTestCases() {

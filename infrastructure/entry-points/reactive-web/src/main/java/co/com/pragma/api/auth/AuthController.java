@@ -29,8 +29,8 @@ public class AuthController {
     private final LoggerPort logger;
     private final RoleStrategyContext roleStrategyContext;
 
-    public AuthController(final JWTUtil jwtUtil, final UserRepository userRepository, final PasswordEncryptor passwordEncryptor,
-                          final LoggerPort logger, final RoleStrategyContext roleStrategyContext) {
+    public AuthController(JWTUtil jwtUtil, UserRepository userRepository, PasswordEncryptor passwordEncryptor,
+                          LoggerPort logger, RoleStrategyContext roleStrategyContext) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.passwordEncryptor = passwordEncryptor;
@@ -39,43 +39,43 @@ public class AuthController {
     }
 
     @PostMapping(value = ApiConstants.LOGIN_PATH, produces = HttpConstants.APPLICATION_JSON)
-    public Mono<ResponseEntity<Map<String, String>>> login(@RequestBody final AuthRequest authRequest) {
-        this.logger.info("Login attempt for username: {}", authRequest.username());
-        return this.userRepository.getUserByEmail(authRequest.username())
-                .doOnNext(user -> this.logger.debug("User found: {}", user.email()))
+    public Mono<ResponseEntity<Map<String, String>>> login(@RequestBody AuthRequest authRequest) {
+        logger.info("Login attempt for username: {}", authRequest.username());
+        return userRepository.getUserByEmail(authRequest.username())
+                .doOnNext(user -> logger.debug("User found: {}", user.email()))
                 .filter(user -> {
-                    final boolean matches = this.passwordEncryptor.matches(authRequest.password(), user.password());
-                    this.logger.debug("Password match for user {}: {}", user.email(), matches);
+                    boolean matches = passwordEncryptor.matches(authRequest.password(), user.password());
+                    logger.debug("Password match for user {}: {}", user.email(), matches);
                     return matches;
                 })
                 .map(user -> {
-                    this.logger.debug("Mapping roles for user: {}", user.email());
-                    final List<String> roles = this.mapRoleIdToRoleName(user.roleId());
-                    this.logger.debug("Roles mapped: {}", roles);
-                    final String token = this.jwtUtil.generateToken(user.email(), roles);
-                    this.logger.info("Token generated for user {}: {}", user.email(), token.substring(0, Math.min(token.length(), 20)) + "...");
+                    logger.debug("Mapping roles for user: {}", user.email());
+                    List<String> roles = mapRoleIdToRoleName(user.roleId());
+                    logger.debug("Roles mapped: {}", roles);
+                    String token = jwtUtil.generateToken(user.email(), roles);
+                    logger.info("Token generated for user {}: {}", user.email(), token.substring(0, Math.min(token.length(), 20)) + "...");
                     return ResponseEntity.ok(Map.of("token", token));
                 })
                 .switchIfEmpty(Mono.defer(() -> {
-                    this.logger.warn("Login failed for username: {}. Invalid credentials.", authRequest.username());
-                    final ResponseEntity<Map<String, String>> responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    logger.warn("Login failed for username: {}. Invalid credentials.", authRequest.username());
+                    ResponseEntity<Map<String, String>> responseEntity = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                             .body(Map.of("error", ErrorMessages.INVALID_CREDENTIALS));
                     return Mono.just(responseEntity);
                 }))
                 .onErrorResume(e -> {
-                    this.logger.error("An unexpected error occurred during login for username {}: {}", e);
+                    logger.error("An unexpected error occurred during login for username {}: {}", e);
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body(Map.of("error", ErrorMessages.INTERNAL_SERVER_ERROR)));
                 });
     }
 
-    private List<String> mapRoleIdToRoleName(final Integer roleId) {
-        this.logger.debug("Mapping roles for roleId: {}", roleId);
+    private List<String> mapRoleIdToRoleName(Integer roleId) {
+        logger.debug("Mapping roles for roleId: {}", roleId);
         if (null == roleId) {
-            this.logger.debug("Role ID is null, returning empty roles list.");
+            logger.debug("Role ID is null, returning empty roles list.");
             return List.of();
         }
-        return this.roleStrategyContext.getRolesForUser(roleId);
+        return roleStrategyContext.getRolesForUser(roleId);
     }
 }
 

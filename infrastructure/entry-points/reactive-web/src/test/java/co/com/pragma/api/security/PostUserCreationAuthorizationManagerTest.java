@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,108 +43,108 @@ class PostUserCreationAuthorizationManagerTest {
 
     @BeforeEach
     void setUp() {
-        this.authorizationManager = new PostUserCreationAuthorizationManager(this.logger);
+        authorizationManager = new PostUserCreationAuthorizationManager(logger);
     }
 
     @Test
     void shouldGrantAccessToAdminUser() {
         // Arrange
-        final Authentication auth = createAuthenticationWithRoles(List.of("ROLE_ADMIN"));
-        final AuthorizationContext context = createAuthorizationContext();
+        Authentication auth = this.createAuthenticationWithRoles(List.of("ROLE_ADMIN"));
+        AuthorizationContext context = this.createAuthorizationContext();
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationManager.check(Mono.just(auth), context);
+        Mono<AuthorizationDecision> result = authorizationManager.check(Mono.just(auth), context);
 
         // Assert
         StepVerifier.create(result)
-                .assertNext(decision -> assertEquals(true, decision.isGranted()))
+                .assertNext(decision -> assertTrue(decision.isGranted()))
                 .verifyComplete();
     }
 
     @Test
     void shouldGrantAccessToAdvisorUser() {
         // Arrange
-        final Authentication auth = createAuthenticationWithRoles(List.of("ROLE_ADVISOR"));
-        final AuthorizationContext context = createAuthorizationContext();
+        Authentication auth = this.createAuthenticationWithRoles(List.of("ROLE_ADVISOR"));
+        AuthorizationContext context = this.createAuthorizationContext();
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationManager.check(Mono.just(auth), context);
+        Mono<AuthorizationDecision> result = authorizationManager.check(Mono.just(auth), context);
 
         // Assert
         StepVerifier.create(result)
-                .assertNext(decision -> assertEquals(true, decision.isGranted()))
+                .assertNext(decision -> assertTrue(decision.isGranted()))
                 .verifyComplete();
     }
 
     @Test
     void shouldDenyAccessToClientUser() {
         // Arrange
-        final Authentication auth = createAuthenticationWithRoles(List.of("ROLE_CLIENT"));
-        final AuthorizationContext context = createAuthorizationContext();
+        Authentication auth = this.createAuthenticationWithRoles(List.of("ROLE_CLIENT"));
+        AuthorizationContext context = this.createAuthorizationContext();
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationManager.check(Mono.just(auth), context);
+        Mono<AuthorizationDecision> result = authorizationManager.check(Mono.just(auth), context);
 
         // Assert
         StepVerifier.create(result)
-                .assertNext(decision -> assertEquals(false, decision.isGranted()))
+                .assertNext(decision -> assertFalse(decision.isGranted()))
                 .verifyComplete();
     }
 
     @Test
     void shouldGrantAccessToUserWithMultipleValidRoles() {
         // Arrange
-        final Authentication auth = createAuthenticationWithRoles(List.of("ROLE_ADMIN", "ROLE_CLIENT"));
-        final AuthorizationContext context = createAuthorizationContext();
+        Authentication auth = this.createAuthenticationWithRoles(List.of("ROLE_ADMIN", "ROLE_CLIENT"));
+        AuthorizationContext context = this.createAuthorizationContext();
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationManager.check(Mono.just(auth), context);
+        Mono<AuthorizationDecision> result = authorizationManager.check(Mono.just(auth), context);
 
         // Assert
         StepVerifier.create(result)
-                .assertNext(decision -> assertEquals(true, decision.isGranted()))
+                .assertNext(decision -> assertTrue(decision.isGranted()))
                 .verifyComplete();
     }
 
     @Test
     void shouldDenyAccessForUnauthenticatedUser() {
         // Arrange
-        final Authentication auth = mock(Authentication.class);
+        Authentication auth = mock(Authentication.class);
         when(auth.isAuthenticated()).thenReturn(false);
-        final AuthorizationContext context = createAuthorizationContext();
+        AuthorizationContext context = this.createAuthorizationContext();
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationManager.check(Mono.just(auth), context);
+        Mono<AuthorizationDecision> result = authorizationManager.check(Mono.just(auth), context);
 
         // Assert
         StepVerifier.create(result)
-                .assertNext(decision -> assertEquals(false, decision.isGranted()))
+                .assertNext(decision -> assertFalse(decision.isGranted()))
                 .verifyComplete();
     }
 
     @Test
     void shouldDenyAccessForEmptyAuthentication() {
         // Arrange
-        final AuthorizationContext context = createAuthorizationContext();
+        AuthorizationContext context = this.createAuthorizationContext();
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationManager.check(Mono.empty(), context);
+        Mono<AuthorizationDecision> result = authorizationManager.check(Mono.empty(), context);
 
         // Assert
         StepVerifier.create(result)
-                .assertNext(decision -> assertEquals(false, decision.isGranted()))
+                .assertNext(decision -> assertFalse(decision.isGranted()))
                 .verifyComplete();
     }
 
     @ParameterizedTest
     @MethodSource("roleAuthorizationTestCases")
-    void shouldHandleRoleBasedAuthorization(final List<String> roles, final boolean expectedAccess, final String scenario) {
+    void shouldHandleRoleBasedAuthorization(List<String> roles, boolean expectedAccess, String scenario) {
         // Arrange
-        final Authentication auth = createAuthenticationWithRoles(roles);
-        final AuthorizationContext context = createAuthorizationContext();
+        Authentication auth = this.createAuthenticationWithRoles(roles);
+        AuthorizationContext context = this.createAuthorizationContext();
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationManager.check(Mono.just(auth), context);
+        Mono<AuthorizationDecision> result = authorizationManager.check(Mono.just(auth), context);
 
         // Assert
         StepVerifier.create(result)
@@ -152,13 +154,13 @@ class PostUserCreationAuthorizationManagerTest {
 
     @ParameterizedTest
     @MethodSource("roleNormalizationTestCases")
-    void shouldNormalizeRolesCorrectly(final List<String> rawRoles, final boolean expectedAccess, final String scenario) {
+    void shouldNormalizeRolesCorrectly(List<String> rawRoles, boolean expectedAccess, String scenario) {
         // Arrange
-        final Authentication auth = createAuthenticationWithRoles(rawRoles);
-        final AuthorizationContext context = createAuthorizationContext();
+        Authentication auth = this.createAuthenticationWithRoles(rawRoles);
+        AuthorizationContext context = this.createAuthorizationContext();
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationManager.check(Mono.just(auth), context);
+        Mono<AuthorizationDecision> result = authorizationManager.check(Mono.just(auth), context);
 
         // Assert
         StepVerifier.create(result)
@@ -169,18 +171,18 @@ class PostUserCreationAuthorizationManagerTest {
     @Test
     void shouldReturnAuthorizationResultFromAuthorizeMethod() {
         // Arrange
-        final Authentication auth = createAuthenticationWithRoles(List.of("ROLE_ADMIN"));
-        final AuthorizationContext context = createAuthorizationContext();
+        Authentication auth = this.createAuthenticationWithRoles(List.of("ROLE_ADMIN"));
+        AuthorizationContext context = this.createAuthorizationContext();
 
         // Act
-        final Mono<AuthorizationResult> result = this.authorizationManager.authorize(Mono.just(auth), context);
+        Mono<AuthorizationResult> result = authorizationManager.authorize(Mono.just(auth), context);
 
         // Assert
         StepVerifier.create(result)
                 .assertNext(authResult -> {
                     assertNotNull(authResult);
                     assertInstanceOf(AuthorizationDecision.class, authResult);
-                    assertEquals(true, authResult.isGranted());
+                    assertTrue(authResult.isGranted());
                 })
                 .verifyComplete();
     }
@@ -188,25 +190,25 @@ class PostUserCreationAuthorizationManagerTest {
     @Test
     void shouldHandleUserWithUnknownRole() {
         // Arrange
-        final Authentication auth = createAuthenticationWithRoles(List.of("ROLE_UNKNOWN"));
-        final AuthorizationContext context = createAuthorizationContext();
+        Authentication auth = this.createAuthenticationWithRoles(List.of("ROLE_UNKNOWN"));
+        AuthorizationContext context = this.createAuthorizationContext();
 
         // Act
-        final Mono<AuthorizationDecision> result = this.authorizationManager.check(Mono.just(auth), context);
+        Mono<AuthorizationDecision> result = authorizationManager.check(Mono.just(auth), context);
 
         // Assert
         StepVerifier.create(result)
-                .assertNext(decision -> assertEquals(false, decision.isGranted()))
+                .assertNext(decision -> assertFalse(decision.isGranted()))
                 .verifyComplete();
     }
 
     @Test
     void shouldBeAnnotatedAsComponent() {
         // Arrange & Act
-        final boolean isComponent = this.authorizationManager.getClass().isAnnotationPresent(org.springframework.stereotype.Component.class);
+        boolean isComponent = authorizationManager.getClass().isAnnotationPresent(org.springframework.stereotype.Component.class);
 
         // Assert
-        assertEquals(true, isComponent, "PostUserCreationAuthorizationManager should be annotated with @Component");
+        assertTrue(isComponent, "PostUserCreationAuthorizationManager should be annotated with @Component");
     }
 
     static Stream<Arguments> roleAuthorizationTestCases() {
@@ -235,12 +237,12 @@ class PostUserCreationAuthorizationManagerTest {
     }
 
     @SuppressWarnings("unchecked")
-    private Authentication createAuthenticationWithRoles(final List<String> roles) {
-        final Authentication auth = mock(Authentication.class);
+    private Authentication createAuthenticationWithRoles(List<String> roles) {
+        Authentication auth = mock(Authentication.class);
         when(auth.isAuthenticated()).thenReturn(true);
         when(auth.getName()).thenReturn("testuser@example.com");
 
-        final Collection<GrantedAuthority> authorities = roles.stream()
+        Collection<GrantedAuthority> authorities = roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .map(authority -> (GrantedAuthority) authority)
                 .toList();
@@ -250,8 +252,8 @@ class PostUserCreationAuthorizationManagerTest {
     }
 
     private AuthorizationContext createAuthorizationContext() {
-        final MockServerHttpRequest request = MockServerHttpRequest.post("/api/v1/usuarios").build();
-        final MockServerWebExchange exchange = MockServerWebExchange.from(request);
+        MockServerHttpRequest request = MockServerHttpRequest.post("/api/v1/usuarios").build();
+        MockServerWebExchange exchange = MockServerWebExchange.from(request);
         return new AuthorizationContext(exchange);
     }
 }

@@ -32,40 +32,40 @@ public class SecurityConfig {
     private final LoggerPort logger;
     private final SecurityFilterChainBuilder securityFilterChainBuilder;
 
-    public SecurityConfig(final LoggerPort logger,
-                          final SecurityFilterChainBuilder securityFilterChainBuilder) {
+    public SecurityConfig(LoggerPort logger,
+                          SecurityFilterChainBuilder securityFilterChainBuilder) {
         this.logger = logger;
         this.securityFilterChainBuilder = securityFilterChainBuilder;
     }
 
     @Bean
     @Primary
-    public UserAuthorizationManager userAuthorizationManager(final LoggerPort logger) {
+    public UserAuthorizationManager userAuthorizationManager(LoggerPort logger) {
         return new UserAuthorizationManager(logger);
     }
 
     @Bean
     @Primary
-    public JWTAuthenticationFilter jwtAuthenticationFilter(final co.com.pragma.security.util.JWTUtil jwtUtil,
-                                                           final LoggerPort logger,
-                                                           final SecurityProperties securityProperties) {
+    public JWTAuthenticationFilter jwtAuthenticationFilter(co.com.pragma.security.util.JWTUtil jwtUtil,
+                                                           LoggerPort logger,
+                                                           SecurityProperties securityProperties) {
         return new JWTAuthenticationFilter(jwtUtil, logger, securityProperties);
     }
 
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(final ServerHttpSecurity http,
-                                                         final SecurityProperties securityProperties,
-                                                         final SecurityRulesProperties securityRulesProperties,
-                                                         final JWTAuthenticationFilter jwtAuthenticationFilter) {
-        this.logger.info("Configuring SecurityWebFilterChain for Autenticacion microservice...");
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
+                                                         SecurityProperties securityProperties,
+                                                         SecurityRulesProperties securityRulesProperties,
+                                                         JWTAuthenticationFilter jwtAuthenticationFilter) {
+        logger.info("Configuring SecurityWebFilterChain for Autenticacion microservice...");
 
         // Create a matcher for the paths that should be excluded from security.
-        final ServerWebExchangeMatcher excludedPathsMatcher = ServerWebExchangeMatchers.pathMatchers(
+        ServerWebExchangeMatcher excludedPathsMatcher = ServerWebExchangeMatchers.pathMatchers(
                 securityProperties.excludedPaths().toArray(new String[0])
         );
 
         // The security filter chain will only apply to paths that are NOT in the exclusion list.
-        final ServerWebExchangeMatcher securedPathsMatcher = new NegatedServerWebExchangeMatcher(excludedPathsMatcher);
+        ServerWebExchangeMatcher securedPathsMatcher = new NegatedServerWebExchangeMatcher(excludedPathsMatcher);
 
         return http
                 .securityMatcher(securedPathsMatcher)
@@ -76,7 +76,7 @@ public class SecurityConfig {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .authorizeExchange(exchanges ->
-                        this.securityFilterChainBuilder.applyAuthorizationRules(exchanges, securityRulesProperties, securityProperties)
+                        securityFilterChainBuilder.applyAuthorizationRules(exchanges, securityRulesProperties, securityProperties)
                 )
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
