@@ -29,6 +29,32 @@ class BCryptPasswordEncryptorTest {
 
     private BCryptPasswordEncryptor passwordEncryptor;
 
+    static Stream<Arguments> passwordMatchingTestCases() {
+        return Stream.of(
+                Arguments.of("password123", "$2a$10$hashedPassword123", true, "Correct password should match"),
+                Arguments.of("password123", "$2a$10$hashedPassword456", false, "Wrong password should not match"),
+                Arguments.of("admin", "$2a$10$adminHash", true, "Admin password should match"),
+                Arguments.of("guest", "$2a$10$adminHash", false, "Different password should not match"),
+                Arguments.of("", "$2a$10$emptyHash", true, "Empty password should match empty hash"),
+                Arguments.of("", "$2a$10$nonEmptyHash", false, "Empty password should not match non-empty hash"),
+                Arguments.of("complexP@$$w0rd!", "$2a$10$complexHash", true, "Complex password should match"),
+                Arguments.of("simple", "$2a$10$complexHash", false, "Simple password should not match complex hash")
+        );
+    }
+
+    static Stream<Arguments> edgeCaseTestCases() {
+        return Stream.of(
+                Arguments.of(null, "$2a$10$hash", false, "Null raw password should not match"),
+                Arguments.of("password", null, false, "Null encoded password should not match"),
+                Arguments.of(null, null, false, "Both null passwords should not match"),
+                Arguments.of("   ", "$2a$10$spaceHash", true, "Whitespace password should match if encoded correctly"),
+                Arguments.of("password", "", false, "Password should not match empty encoded string"),
+                Arguments.of("", "", true, "Both empty strings should match"),
+                Arguments.of("unicode🔒", "$2a$10$unicodeHash", true, "Unicode password should match"),
+                Arguments.of("case", "$2a$10$caseHash", false, "Case sensitive passwords should not match")
+        );
+    }
+
     @BeforeEach
     void setUp() {
         passwordEncryptor = new BCryptPasswordEncryptor(passwordEncoder);
@@ -149,31 +175,5 @@ class BCryptPasswordEncryptorTest {
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         passwordEncryptor.matches(rawPassword, encodedPassword);
         verify(passwordEncoder).matches(rawPassword, encodedPassword);
-    }
-
-    static Stream<Arguments> passwordMatchingTestCases() {
-        return Stream.of(
-                Arguments.of("password123", "$2a$10$hashedPassword123", true, "Correct password should match"),
-                Arguments.of("password123", "$2a$10$hashedPassword456", false, "Wrong password should not match"),
-                Arguments.of("admin", "$2a$10$adminHash", true, "Admin password should match"),
-                Arguments.of("guest", "$2a$10$adminHash", false, "Different password should not match"),
-                Arguments.of("", "$2a$10$emptyHash", true, "Empty password should match empty hash"),
-                Arguments.of("", "$2a$10$nonEmptyHash", false, "Empty password should not match non-empty hash"),
-                Arguments.of("complexP@$$w0rd!", "$2a$10$complexHash", true, "Complex password should match"),
-                Arguments.of("simple", "$2a$10$complexHash", false, "Simple password should not match complex hash")
-        );
-    }
-
-    static Stream<Arguments> edgeCaseTestCases() {
-        return Stream.of(
-                Arguments.of(null, "$2a$10$hash", false, "Null raw password should not match"),
-                Arguments.of("password", null, false, "Null encoded password should not match"),
-                Arguments.of(null, null, false, "Both null passwords should not match"),
-                Arguments.of("   ", "$2a$10$spaceHash", true, "Whitespace password should match if encoded correctly"),
-                Arguments.of("password", "", false, "Password should not match empty encoded string"),
-                Arguments.of("", "", true, "Both empty strings should match"),
-                Arguments.of("unicode🔒", "$2a$10$unicodeHash", true, "Unicode password should match"),
-                Arguments.of("case", "$2a$10$caseHash", false, "Case sensitive passwords should not match")
-        );
     }
 }

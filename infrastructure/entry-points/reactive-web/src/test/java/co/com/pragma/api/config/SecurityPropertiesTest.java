@@ -11,11 +11,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SecurityPropertiesTest {
 
     private SecurityProperties securityProperties;
+
+    static Stream<Arguments> excludedPathsScenarios() {
+        return Stream.of(
+                Arguments.of("Business paths",
+                        List.of("/auth/login", "/auth/register", "/actuator/health"), false),
+                Arguments.of("Single path",
+                        List.of("/public"), false),
+                Arguments.of("Empty list",
+                        List.of(), true),
+                Arguments.of("Admin paths",
+                        List.of("/admin/**", "/management/**"), false),
+                Arguments.of("Health check paths",
+                        List.of("/actuator/health", "/actuator/info"), false)
+        );
+    }
 
     @BeforeEach
     void setUp() {
@@ -86,20 +105,5 @@ class SecurityPropertiesTest {
         assertEquals(testSecret, this.securityProperties.secret());
         assertEquals(testExpiration, this.securityProperties.expiration());
         assertEquals(testPaths, this.securityProperties.excludedPaths());
-    }
-
-    static Stream<Arguments> excludedPathsScenarios() {
-        return Stream.of(
-            Arguments.of("Business paths",
-                        List.of("/auth/login", "/auth/register", "/actuator/health"), false),
-            Arguments.of("Single path",
-                        List.of("/public"), false),
-            Arguments.of("Empty list",
-                        List.of(), true),
-            Arguments.of("Admin paths",
-                        List.of("/admin/**", "/management/**"), false),
-            Arguments.of("Health check paths",
-                        List.of("/actuator/health", "/actuator/info"), false)
-        );
     }
 }

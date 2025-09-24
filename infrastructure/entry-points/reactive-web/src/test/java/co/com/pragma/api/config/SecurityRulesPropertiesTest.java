@@ -11,12 +11,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 class SecurityRulesPropertiesTest {
 
     private SecurityRulesProperties securityRulesProperties;
+
+    static Stream<Arguments> authorizationRuleScenarios() {
+        return Stream.of(
+                Arguments.of("Empty rules list",
+                        List.of(), true),
+                Arguments.of("Single authorization rule",
+                        List.of(mock(AuthorizationRule.class)), false),
+                Arguments.of("Multiple authorization rules",
+                        List.of(mock(AuthorizationRule.class), mock(AuthorizationRule.class)), false),
+                Arguments.of("Complex authorization setup",
+                        List.of(mock(AuthorizationRule.class), mock(AuthorizationRule.class),
+                                mock(AuthorizationRule.class), mock(AuthorizationRule.class)), false)
+        );
+    }
 
     @BeforeEach
     void setUp() {
@@ -82,19 +100,5 @@ class SecurityRulesPropertiesTest {
         List<AuthorizationRule> retrievedRules = this.securityRulesProperties.getAuthorization();
 
         assertSame(rules, retrievedRules, "Should maintain reference to the same list");
-    }
-
-    static Stream<Arguments> authorizationRuleScenarios() {
-        return Stream.of(
-            Arguments.of("Empty rules list",
-                        List.of(), true),
-            Arguments.of("Single authorization rule",
-                        List.of(mock(AuthorizationRule.class)), false),
-            Arguments.of("Multiple authorization rules",
-                        List.of(mock(AuthorizationRule.class), mock(AuthorizationRule.class)), false),
-            Arguments.of("Complex authorization setup",
-                        List.of(mock(AuthorizationRule.class), mock(AuthorizationRule.class),
-                               mock(AuthorizationRule.class), mock(AuthorizationRule.class)), false)
-        );
     }
 }

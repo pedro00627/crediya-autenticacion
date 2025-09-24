@@ -40,6 +40,17 @@ class UserAuthorizationLogicTest {
 
     private UserAuthorizationLogic authorizationLogic;
 
+    static Stream<Arguments> clientAccessTestCases() {
+        return Stream.of(
+                Arguments.of("user@example.com", "user@example.com", true, "Client should access their own data"),
+                Arguments.of("user@example.com", "other@example.com", false, "Client should not access other user's data"),
+                Arguments.of("USER@EXAMPLE.COM", "user@example.com", true, "Should handle case insensitive email comparison"),
+                Arguments.of("user@example.com", "USER@EXAMPLE.COM", true, "Should handle case insensitive requested email"),
+                Arguments.of("user@example.com", "", false, "Client should not access when empty email is requested"),
+                Arguments.of("user@example.com", null, false, "Client should not access when null email is requested")
+        );
+    }
+
     @BeforeEach
     void setUp() {
         authorizationLogic = new UserAuthorizationLogic(logger);
@@ -229,8 +240,8 @@ class UserAuthorizationLogicTest {
         // Arrange - User with both CLIENT and ADMIN roles (ADMIN should take precedence)
         Authentication authentication = createAuthentication("multiRole@example.com", true,
                 List.of(
-                    new SimpleGrantedAuthority(RoleConstants.CLIENT),
-                    new SimpleGrantedAuthority(RoleConstants.ADMIN)
+                        new SimpleGrantedAuthority(RoleConstants.CLIENT),
+                        new SimpleGrantedAuthority(RoleConstants.ADMIN)
                 ));
         AuthorizationContext context = createAuthorizationContext("/api/users?email=other@example.com");
 
@@ -303,16 +314,5 @@ class UserAuthorizationLogicTest {
         AuthorizationContext context = mock(AuthorizationContext.class);
         lenient().when(context.getExchange()).thenReturn(exchange);
         return context;
-    }
-
-    static Stream<Arguments> clientAccessTestCases() {
-        return Stream.of(
-                Arguments.of("user@example.com", "user@example.com", true, "Client should access their own data"),
-                Arguments.of("user@example.com", "other@example.com", false, "Client should not access other user's data"),
-                Arguments.of("USER@EXAMPLE.COM", "user@example.com", true, "Should handle case insensitive email comparison"),
-                Arguments.of("user@example.com", "USER@EXAMPLE.COM", true, "Should handle case insensitive requested email"),
-                Arguments.of("user@example.com", "", false, "Client should not access when empty email is requested"),
-                Arguments.of("user@example.com", null, false, "Client should not access when null email is requested")
-        );
     }
 }

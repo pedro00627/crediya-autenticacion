@@ -1,7 +1,6 @@
 package co.com.pragma.api.security;
 
 import co.com.pragma.model.log.gateways.LoggerPort;
-import co.com.pragma.security.model.RoleConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +39,31 @@ class PostUserCreationAuthorizationManagerTest {
     private LoggerPort logger;
 
     private PostUserCreationAuthorizationManager authorizationManager;
+
+    static Stream<Arguments> roleAuthorizationTestCases() {
+        return Stream.of(
+                Arguments.of(List.of("ROLE_ADMIN"), true, "Admin should have access"),
+                Arguments.of(List.of("ROLE_ADVISOR"), true, "Advisor should have access"),
+                Arguments.of(List.of("ROLE_CLIENT"), false, "Client should not have access"),
+                Arguments.of(List.of("ROLE_ADMIN", "ROLE_CLIENT"), true, "User with admin and client roles should have access"),
+                Arguments.of(List.of("ROLE_ADVISOR", "ROLE_CLIENT"), true, "User with advisor and client roles should have access"),
+                Arguments.of(List.of("ROLE_CLIENT", "ROLE_USER"), false, "User with only non-admin roles should not have access"),
+                Arguments.of(List.of(), false, "User with no roles should not have access")
+        );
+    }
+
+    static Stream<Arguments> roleNormalizationTestCases() {
+        return Stream.of(
+                Arguments.of(List.of("ADMIN"), true, "Should handle normalized admin role"),
+                Arguments.of(List.of("ADVISOR"), true, "Should handle normalized advisor role"),
+                Arguments.of(List.of("CLIENT"), false, "Should handle normalized client role"),
+                Arguments.of(List.of("ROLE_ADMIN"), true, "Should handle prefixed admin role"),
+                Arguments.of(List.of("ROLE_ADVISOR"), true, "Should handle prefixed advisor role"),
+                Arguments.of(List.of("ROLE_CLIENT"), false, "Should handle prefixed client role"),
+                Arguments.of(List.of("ADMIN", "ROLE_CLIENT"), true, "Should handle mixed normalized and prefixed roles"),
+                Arguments.of(List.of("ROLE_ADVISOR", "CLIENT"), true, "Should handle mixed prefixed and normalized roles")
+        );
+    }
 
     @BeforeEach
     void setUp() {
@@ -209,31 +233,6 @@ class PostUserCreationAuthorizationManagerTest {
 
         // Assert
         assertTrue(isComponent, "PostUserCreationAuthorizationManager should be annotated with @Component");
-    }
-
-    static Stream<Arguments> roleAuthorizationTestCases() {
-        return Stream.of(
-                Arguments.of(List.of("ROLE_ADMIN"), true, "Admin should have access"),
-                Arguments.of(List.of("ROLE_ADVISOR"), true, "Advisor should have access"),
-                Arguments.of(List.of("ROLE_CLIENT"), false, "Client should not have access"),
-                Arguments.of(List.of("ROLE_ADMIN", "ROLE_CLIENT"), true, "User with admin and client roles should have access"),
-                Arguments.of(List.of("ROLE_ADVISOR", "ROLE_CLIENT"), true, "User with advisor and client roles should have access"),
-                Arguments.of(List.of("ROLE_CLIENT", "ROLE_USER"), false, "User with only non-admin roles should not have access"),
-                Arguments.of(List.of(), false, "User with no roles should not have access")
-        );
-    }
-
-    static Stream<Arguments> roleNormalizationTestCases() {
-        return Stream.of(
-                Arguments.of(List.of("ADMIN"), true, "Should handle normalized admin role"),
-                Arguments.of(List.of("ADVISOR"), true, "Should handle normalized advisor role"),
-                Arguments.of(List.of("CLIENT"), false, "Should handle normalized client role"),
-                Arguments.of(List.of("ROLE_ADMIN"), true, "Should handle prefixed admin role"),
-                Arguments.of(List.of("ROLE_ADVISOR"), true, "Should handle prefixed advisor role"),
-                Arguments.of(List.of("ROLE_CLIENT"), false, "Should handle prefixed client role"),
-                Arguments.of(List.of("ADMIN", "ROLE_CLIENT"), true, "Should handle mixed normalized and prefixed roles"),
-                Arguments.of(List.of("ROLE_ADVISOR", "CLIENT"), true, "Should handle mixed prefixed and normalized roles")
-        );
     }
 
     @SuppressWarnings("unchecked")

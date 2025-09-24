@@ -16,6 +16,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RoleStrategyTest {
 
+    static Stream<Arguments> strategyTestCases() {
+        return Stream.of(
+                Arguments.of(new AdminRoleStrategy(), BusinessConstants.ADMIN_ROLE_ID),
+                Arguments.of(new ClientRoleStrategy(), BusinessConstants.CLIENT_ROLE_ID),
+                Arguments.of(new AdvisorRoleStrategy(), BusinessConstants.ADVISOR_ROLE_ID)
+        );
+    }
+
+    static Stream<Arguments> strategyRoleTestCases() {
+        return Stream.of(
+                Arguments.of(new AdminRoleStrategy(), RoleConstants.ADMIN),
+                Arguments.of(new ClientRoleStrategy(), RoleConstants.CLIENT),
+                Arguments.of(new AdvisorRoleStrategy(), RoleConstants.ADVISOR)
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("strategyTestCases")
     void shouldSupportCorrectRoleId(RoleStrategy strategy, Integer supportedRoleId) {
@@ -57,21 +73,5 @@ class RoleStrategyTest {
         List<String> roles2 = strategy.getRoles();
 
         assertEquals(roles1, roles2);
-    }
-
-    static Stream<Arguments> strategyTestCases() {
-        return Stream.of(
-            Arguments.of(new AdminRoleStrategy(), BusinessConstants.ADMIN_ROLE_ID),
-            Arguments.of(new ClientRoleStrategy(), BusinessConstants.CLIENT_ROLE_ID),
-            Arguments.of(new AdvisorRoleStrategy(), BusinessConstants.ADVISOR_ROLE_ID)
-        );
-    }
-
-    static Stream<Arguments> strategyRoleTestCases() {
-        return Stream.of(
-            Arguments.of(new AdminRoleStrategy(), RoleConstants.ADMIN),
-            Arguments.of(new ClientRoleStrategy(), RoleConstants.CLIENT),
-            Arguments.of(new AdvisorRoleStrategy(), RoleConstants.ADVISOR)
-        );
     }
 }

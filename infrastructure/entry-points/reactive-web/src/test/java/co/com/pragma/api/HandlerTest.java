@@ -64,6 +64,29 @@ class HandlerTest {
     private User userModel;
     private UserResponseRecord userResponse;
 
+    static Stream<Arguments> getUserByEmailOrIdentityDocumentTestCases() {
+        return Stream.of(
+                Arguments.of(Optional.of("test@example.com"), Optional.empty(), true, "Should succeed with email only"),
+                Arguments.of(Optional.empty(), Optional.of("123456789"), true, "Should succeed with identity document only"),
+                Arguments.of(Optional.of("test@example.com"), Optional.of("123456789"), true, "Should succeed with both parameters"),
+                Arguments.of(Optional.empty(), Optional.empty(), false, "Should fail with no parameters")
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    static Stream<Arguments> validationTestCases() {
+        ConstraintViolation<UserRequestRecord> violation = mock(ConstraintViolation.class);
+        Path propertyPath = mock(Path.class);
+        when(propertyPath.toString()).thenReturn("firstName");
+        when(violation.getPropertyPath()).thenReturn(propertyPath);
+        when(violation.getMessage()).thenReturn("Error message");
+
+        return Stream.of(
+                Arguments.of(Collections.emptySet(), true, "Should succeed with no validation errors"),
+                Arguments.of(Set.of(violation), false, "Should fail with validation errors")
+        );
+    }
+
     @BeforeEach
     void setUp() {
         userRequest = new UserRequestRecord(
@@ -266,6 +289,9 @@ class HandlerTest {
                 .verifyComplete();
     }
 
+    // Test removed due to encoding issues with Spanish characters.
+    // The functionality is covered by other logging tests.
+
     @Test
     void getUserByEmailOrIdentityDocumentShouldReturnUserWhenFound() {
         // Arrange
@@ -322,9 +348,6 @@ class HandlerTest {
         }
     }
 
-    // Test removed due to encoding issues with Spanish characters.
-    // The functionality is covered by other logging tests.
-
     @Test
     void shouldMaskEmailInLogs() {
         // Arrange
@@ -344,28 +367,5 @@ class HandlerTest {
         verify(logger).maskEmail(email);
         // Note: logger.info is called with logger.maskEmail(email) as parameter,
         // so we verify the important part which is that maskEmail was called
-    }
-
-    static Stream<Arguments> getUserByEmailOrIdentityDocumentTestCases() {
-        return Stream.of(
-                Arguments.of(Optional.of("test@example.com"), Optional.empty(), true, "Should succeed with email only"),
-                Arguments.of(Optional.empty(), Optional.of("123456789"), true, "Should succeed with identity document only"),
-                Arguments.of(Optional.of("test@example.com"), Optional.of("123456789"), true, "Should succeed with both parameters"),
-                Arguments.of(Optional.empty(), Optional.empty(), false, "Should fail with no parameters")
-        );
-    }
-
-    @SuppressWarnings("unchecked")
-    static Stream<Arguments> validationTestCases() {
-        ConstraintViolation<UserRequestRecord> violation = mock(ConstraintViolation.class);
-        Path propertyPath = mock(Path.class);
-        when(propertyPath.toString()).thenReturn("firstName");
-        when(violation.getPropertyPath()).thenReturn(propertyPath);
-        when(violation.getMessage()).thenReturn("Error message");
-
-        return Stream.of(
-                Arguments.of(Collections.emptySet(), true, "Should succeed with no validation errors"),
-                Arguments.of(Set.of(violation), false, "Should fail with validation errors")
-        );
     }
 }

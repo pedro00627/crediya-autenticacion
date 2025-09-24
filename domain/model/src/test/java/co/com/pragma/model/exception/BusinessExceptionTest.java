@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 class BusinessExceptionTest {
     @Test
-    void BusinessExceptionTestHasException(){
+    void BusinessExceptionTestHasException() {
         final String err = "Has error";
         final BusinessException exception = new BusinessException(err);
         Assertions.assertEquals(err, exception.getMessage());

@@ -1,7 +1,6 @@
 package co.com.pragma.api.auth;
 
 import co.com.pragma.api.auth.strategy.RoleStrategyContext;
-import co.com.pragma.model.exception.BusinessException;
 import co.com.pragma.model.log.gateways.LoggerPort;
 import co.com.pragma.model.security.PasswordEncryptor;
 import co.com.pragma.model.user.User;
@@ -34,30 +33,83 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AuthBusinessRulesTest {
 
-    @Mock private JWTUtil jwtUtil;
-    @Mock private UserRepository userRepository;
-    @Mock private PasswordEncryptor passwordEncryptor;
-    @Mock private LoggerPort logger;
-    @Mock private RoleStrategyContext roleStrategyContext;
+    @Mock
+    private JWTUtil jwtUtil;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private PasswordEncryptor passwordEncryptor;
+    @Mock
+    private LoggerPort logger;
+    @Mock
+    private RoleStrategyContext roleStrategyContext;
 
-    @InjectMocks private AuthController authController;
+    @InjectMocks
+    private AuthController authController;
 
     private User validUser;
     private AuthRequest validRequest;
 
+    static Stream<Arguments> criticalBusinessScenarios() {
+        return Stream.of(
+                Arguments.of("Valid client with correct credentials",
+                        new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
+                                "client@example.com", "123456789", "3001234567",
+                                1, 50000.0, "hashedPassword"),
+                        true, HttpStatus.OK),
+
+                Arguments.of("Valid advisor with correct credentials",
+                        new User("2", "Jane", "Smith", LocalDate.of(1985, 3, 20),
+                                "advisor@example.com", "987654321", "3009876543",
+                                2, 75000.0, "hashedPassword"),
+                        true, HttpStatus.OK),
+
+                Arguments.of("Admin with incorrect password",
+                        new User("3", "Admin", "User", LocalDate.of(1980, 1, 1),
+                                "admin@example.com", "111111111", "3001111111",
+                                3, 100000.0, "hashedPassword"),
+                        false, HttpStatus.UNAUTHORIZED),
+
+                Arguments.of("User with negative salary (business rule violation)",
+                        new User("4", "Bad", "Salary", LocalDate.of(1990, 1, 1),
+                                "bad@example.com", "222222222", "3002222222",
+                                1, -1000.0, "hashedPassword"),
+                        true, HttpStatus.OK)
+        );
+    }
+
+    static Stream<Arguments> invalidUserDataScenarios() {
+        return Stream.of(
+                Arguments.of("User with empty phone",
+                        new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
+                                "user@example.com", "123456789", "",
+                                1, 50000.0, "hashedPassword")),
+
+                Arguments.of("User with future birth date",
+                        new User("2", "Future", "Baby", LocalDate.now().plusDays(1),
+                                "future@example.com", "123456789", "3001234567",
+                                1, 50000.0, "hashedPassword")),
+
+                Arguments.of("User with very low salary",
+                        new User("3", "Poor", "User", LocalDate.of(1990, 5, 15),
+                                "poor@example.com", "123456789", "3001234567",
+                                1, 1.0, "hashedPassword"))
+        );
+    }
+
     @BeforeEach
     void setUp() {
         this.validUser = new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
-                           "john.doe@example.com", "123456789", "3001234567",
-                           1, 50000.0, "hashedPassword");
+                "john.doe@example.com", "123456789", "3001234567",
+                1, 50000.0, "hashedPassword");
         this.validRequest = new AuthRequest("john.doe@example.com", "plainPassword");
     }
 
     @Test
     void shouldHandleLoginForInactiveUser() {
         User inactiveUser = new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
-                                         "john.doe@example.com", "123456789", "3001234567",
-                                         null, 50000.0, "hashedPassword"); // null roleId = inactive
+                "john.doe@example.com", "123456789", "3001234567",
+                null, 50000.0, "hashedPassword"); // null roleId = inactive
 
         when(this.userRepository.getUserByEmail(this.validRequest.username())).thenReturn(Mono.just(inactiveUser));
         when(this.passwordEncryptor.matches(this.validRequest.password(), inactiveUser.password())).thenReturn(true);
@@ -67,7 +119,7 @@ class AuthBusinessRulesTest {
                 .assertNext(response -> {
                     // El sistema actualmente permite login con roleId null y genera token vacío
                     assertTrue(response.getStatusCode().is2xxSuccessful() ||
-                              response.getStatusCode().is4xxClientError());
+                            response.getStatusCode().is4xxClientError());
                 })
                 .verifyComplete();
     }
@@ -89,7 +141,7 @@ class AuthBusinessRulesTest {
 
         StepVerifier.create(this.authController.login(request))
                 .assertNext(response ->
-                    assertEquals(expectedStatus, response.getStatusCode(), scenario))
+                        assertEquals(expectedStatus, response.getStatusCode(), scenario))
                 .verifyComplete();
     }
 
@@ -102,8 +154,8 @@ class AuthBusinessRulesTest {
 
         List<Mono<Void>> concurrentLogins = Stream.generate(() ->
                 this.authController.login(this.validRequest)
-                    .doOnNext(response -> assertEquals(HttpStatus.OK, response.getStatusCode()))
-                    .then()
+                        .doOnNext(response -> assertEquals(HttpStatus.OK, response.getStatusCode()))
+                        .then()
         ).limit(10).toList();
 
         StepVerifier.create(Mono.when(concurrentLogins))
@@ -140,52 +192,5 @@ class AuthBusinessRulesTest {
                     assertTrue(response.getBody().containsKey("token"));
                 })
                 .verifyComplete();
-    }
-
-    static Stream<Arguments> criticalBusinessScenarios() {
-        return Stream.of(
-            Arguments.of("Valid client with correct credentials",
-                        new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
-                               "client@example.com", "123456789", "3001234567",
-                               1, 50000.0, "hashedPassword"),
-                        true, HttpStatus.OK),
-
-            Arguments.of("Valid advisor with correct credentials",
-                        new User("2", "Jane", "Smith", LocalDate.of(1985, 3, 20),
-                               "advisor@example.com", "987654321", "3009876543",
-                               2, 75000.0, "hashedPassword"),
-                        true, HttpStatus.OK),
-
-            Arguments.of("Admin with incorrect password",
-                        new User("3", "Admin", "User", LocalDate.of(1980, 1, 1),
-                               "admin@example.com", "111111111", "3001111111",
-                               3, 100000.0, "hashedPassword"),
-                        false, HttpStatus.UNAUTHORIZED),
-
-            Arguments.of("User with negative salary (business rule violation)",
-                        new User("4", "Bad", "Salary", LocalDate.of(1990, 1, 1),
-                               "bad@example.com", "222222222", "3002222222",
-                               1, -1000.0, "hashedPassword"),
-                        true, HttpStatus.OK)
-        );
-    }
-
-    static Stream<Arguments> invalidUserDataScenarios() {
-        return Stream.of(
-            Arguments.of("User with empty phone",
-                        new User("1", "John", "Doe", LocalDate.of(1990, 5, 15),
-                               "user@example.com", "123456789", "",
-                               1, 50000.0, "hashedPassword")),
-
-            Arguments.of("User with future birth date",
-                        new User("2", "Future", "Baby", LocalDate.now().plusDays(1),
-                               "future@example.com", "123456789", "3001234567",
-                               1, 50000.0, "hashedPassword")),
-
-            Arguments.of("User with very low salary",
-                        new User("3", "Poor", "User", LocalDate.of(1990, 5, 15),
-                               "poor@example.com", "123456789", "3001234567",
-                               1, 1.0, "hashedPassword"))
-        );
     }
 }

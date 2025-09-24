@@ -56,6 +56,25 @@ class AuthControllerTest {
     private User testUser;
     private AuthRequest authRequest;
 
+    static Stream<Arguments> roleTestCases() {
+        return Stream.of(
+                Arguments.of(1, List.of("CLIENT"), "Client role should map correctly"),
+                Arguments.of(2, List.of("ADVISOR"), "Advisor role should map correctly"),
+                Arguments.of(3, List.of("ADMIN"), "Admin role should map correctly"),
+                Arguments.of(99, List.of(), "Unknown role should return empty list")
+        );
+    }
+
+    static Stream<Arguments> authRequestTestCases() {
+        return Stream.of(
+                Arguments.of("valid@example.com", "validPassword", true, true, HttpStatus.OK, "Valid credentials should succeed"),
+                Arguments.of("valid@example.com", "invalidPassword", true, false, HttpStatus.UNAUTHORIZED, "Invalid password should fail"),
+                Arguments.of("nonexistent@example.com", "anyPassword", false, false, HttpStatus.UNAUTHORIZED, "Non-existent user should fail"),
+                Arguments.of("admin@example.com", "adminPassword", true, true, HttpStatus.OK, "Admin credentials should succeed"),
+                Arguments.of("", "password", false, false, HttpStatus.UNAUTHORIZED, "Empty username should fail")
+        );
+    }
+
     @BeforeEach
     void setUp() {
         testUser = new User(
@@ -160,8 +179,8 @@ class AuthControllerTest {
     void loginShouldHandleDifferentRoles(Integer roleId, List<String> expectedRoles, String scenario) {
         // Arrange
         User userWithRole = new User("1", "Test", "User", LocalDate.now(),
-                                   "test@example.com", "123456789", "3001234567",
-                                   roleId, 50000.0, "hashedPassword");
+                "test@example.com", "123456789", "3001234567",
+                roleId, 50000.0, "hashedPassword");
         AuthRequest request = new AuthRequest("test@example.com", "password");
         final String expectedToken = "jwt.token.here";
 
@@ -188,8 +207,8 @@ class AuthControllerTest {
     void loginShouldHandleNullRoleId() {
         // Arrange
         User userWithNullRole = new User("1", "Test", "User", LocalDate.now(),
-                                       "test@example.com", "123456789", "3001234567",
-                                       null, 50000.0, "hashedPassword");
+                "test@example.com", "123456789", "3001234567",
+                null, 50000.0, "hashedPassword");
         AuthRequest request = new AuthRequest("test@example.com", "password");
         final String expectedToken = "jwt.token.here";
         List<String> emptyRoles = List.of();
@@ -242,24 +261,5 @@ class AuthControllerTest {
         StepVerifier.create(result)
                 .assertNext(response -> assertEquals(expectedStatus, response.getStatusCode(), scenario))
                 .verifyComplete();
-    }
-
-    static Stream<Arguments> roleTestCases() {
-        return Stream.of(
-                Arguments.of(1, List.of("CLIENT"), "Client role should map correctly"),
-                Arguments.of(2, List.of("ADVISOR"), "Advisor role should map correctly"),
-                Arguments.of(3, List.of("ADMIN"), "Admin role should map correctly"),
-                Arguments.of(99, List.of(), "Unknown role should return empty list")
-        );
-    }
-
-    static Stream<Arguments> authRequestTestCases() {
-        return Stream.of(
-                Arguments.of("valid@example.com", "validPassword", true, true, HttpStatus.OK, "Valid credentials should succeed"),
-                Arguments.of("valid@example.com", "invalidPassword", true, false, HttpStatus.UNAUTHORIZED, "Invalid password should fail"),
-                Arguments.of("nonexistent@example.com", "anyPassword", false, false, HttpStatus.UNAUTHORIZED, "Non-existent user should fail"),
-                Arguments.of("admin@example.com", "adminPassword", true, true, HttpStatus.OK, "Admin credentials should succeed"),
-                Arguments.of("", "password", false, false, HttpStatus.UNAUTHORIZED, "Empty username should fail")
-        );
     }
 }

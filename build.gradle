@@ -29,7 +29,7 @@ ext {
     reactiveCommonsMapperVersion = '0.1.0'
     archunitVersion = '1.4.1'
     jjwtVersion = '0.12.6'
-    commonVersion = '0.0.60'
+    commonVersion = '0.0.61'
 }
 
 subprojects {

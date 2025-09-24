@@ -45,6 +45,58 @@ class UserUseCaseTest {
 
     private User user;
 
+    static Stream<Arguments> businessRuleViolationCases() {
+        return Stream.of(
+                Arguments.of("Duplicate email",
+                        new User(null, "John", "Duplicate", LocalDate.of(1990, 1, 1),
+                                "existing@crediya.com", "123456789", "3001234567",
+                                1, 50000.0, "password"),
+                        "El correo electrónico ya existe"),
+
+                Arguments.of("Underage user",
+                        new User(null, "Young", "User", LocalDate.now().minusYears(16),
+                                "young@example.com", "123456789", "3001234567",
+                                1, 30000.0, "password"),
+                        "El usuario debe ser mayor de edad"),
+
+                Arguments.of("Invalid salary range",
+                        new User(null, "Low", "Salary", LocalDate.of(1990, 1, 1),
+                                "lowsalary@example.com", "123456789", "3001234567",
+                                1, 500.0, "password"),
+                        "El salario debe estar en el rango válido"),
+
+                Arguments.of("Invalid role for salary",
+                        new User(null, "Bad", "RoleSalary", LocalDate.of(1990, 1, 1),
+                                "badrole@example.com", "123456789", "3001234567",
+                                1, 200000.0, "password"),
+                        "El salario no es válido para el rol especificado")
+        );
+    }
+
+    static Stream<Arguments> validUserCases() {
+        return Stream.of(
+                Arguments.of("Valid client with minimum salary",
+                        new User(null, "Min", "Client", LocalDate.of(1995, 1, 1),
+                                "min.client@crediya.com", "111111111", "3001111111",
+                                1, 25000.0, "password")),
+
+                Arguments.of("Valid advisor with mid-range salary",
+                        new User(null, "Mid", "Advisor", LocalDate.of(1988, 6, 15),
+                                "mid.advisor@crediya.com", "222222222", "3002222222",
+                                2, 80000.0, "password")),
+
+                Arguments.of("Valid admin with high salary",
+                        new User(null, "High", "Admin", LocalDate.of(1985, 12, 25),
+                                "high.admin@crediya.com", "333333333", "3003333333",
+                                3, 150000.0, "password")),
+
+                Arguments.of("Exact age limit user",
+                        new User(null, "Edge", "Case", LocalDate.now().minusYears(18),
+                                "edge@crediya.com", "444444444", "3004444444",
+                                1, 30000.0, "password"))
+        );
+    }
+
     @BeforeEach
     void setUp() {
         user = new User(
@@ -145,9 +197,9 @@ class UserUseCaseTest {
         when(passwordEncryptor.encode(validUser.password())).thenReturn("encrypted_password");
 
         User savedUser = new User("generated-id", validUser.firstName(), validUser.lastName(),
-                                      validUser.birthDate(), validUser.email(), validUser.identityDocument(),
-                                      validUser.phone(), validUser.roleId(), validUser.baseSalary(),
-                                      "encrypted_password");
+                validUser.birthDate(), validUser.email(), validUser.identityDocument(),
+                validUser.phone(), validUser.roleId(), validUser.baseSalary(),
+                "encrypted_password");
         when(userRepository.saveUser(any(User.class))).thenReturn(Mono.just(savedUser));
 
         // Act
@@ -167,17 +219,17 @@ class UserUseCaseTest {
     void saveUserShouldPreserveBusinessDataIntegrity() {
         // Arrange - Usuario con datos específicos de negocio
         User businessUser = new User(null, "María", "González", LocalDate.of(1985, 3, 15),
-                                         "maria.gonzalez@crediya.com", "987654321", "3109876543",
-                                         2, 75000.0, "secure_password");
+                "maria.gonzalez@crediya.com", "987654321", "3109876543",
+                2, 75000.0, "secure_password");
 
         when(userValidator.validateUser(businessUser)).thenReturn(Mono.just(businessUser));
         when(passwordEncryptor.encode("secure_password")).thenReturn("hashed_secure_password");
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         User savedUser = new User("uuid-generated", businessUser.firstName(), businessUser.lastName(),
-                                      businessUser.birthDate(), businessUser.email(), businessUser.identityDocument(),
-                                      businessUser.phone(), businessUser.roleId(), businessUser.baseSalary(),
-                                      "hashed_secure_password");
+                businessUser.birthDate(), businessUser.email(), businessUser.identityDocument(),
+                businessUser.phone(), businessUser.roleId(), businessUser.baseSalary(),
+                "hashed_secure_password");
         when(userRepository.saveUser(any(User.class))).thenReturn(Mono.just(savedUser));
 
         // Act
@@ -196,57 +248,5 @@ class UserUseCaseTest {
         verify(userRepository).saveUser(userCaptor.capture());
         User capturedUser = userCaptor.getValue();
         assertEquals("hashed_secure_password", capturedUser.password());
-    }
-
-    static Stream<Arguments> businessRuleViolationCases() {
-        return Stream.of(
-            Arguments.of("Duplicate email",
-                        new User(null, "John", "Duplicate", LocalDate.of(1990, 1, 1),
-                               "existing@crediya.com", "123456789", "3001234567",
-                               1, 50000.0, "password"),
-                        "El correo electrónico ya existe"),
-
-            Arguments.of("Underage user",
-                        new User(null, "Young", "User", LocalDate.now().minusYears(16),
-                               "young@example.com", "123456789", "3001234567",
-                               1, 30000.0, "password"),
-                        "El usuario debe ser mayor de edad"),
-
-            Arguments.of("Invalid salary range",
-                        new User(null, "Low", "Salary", LocalDate.of(1990, 1, 1),
-                               "lowsalary@example.com", "123456789", "3001234567",
-                               1, 500.0, "password"),
-                        "El salario debe estar en el rango válido"),
-
-            Arguments.of("Invalid role for salary",
-                        new User(null, "Bad", "RoleSalary", LocalDate.of(1990, 1, 1),
-                               "badrole@example.com", "123456789", "3001234567",
-                               1, 200000.0, "password"),
-                        "El salario no es válido para el rol especificado")
-        );
-    }
-
-    static Stream<Arguments> validUserCases() {
-        return Stream.of(
-            Arguments.of("Valid client with minimum salary",
-                        new User(null, "Min", "Client", LocalDate.of(1995, 1, 1),
-                               "min.client@crediya.com", "111111111", "3001111111",
-                               1, 25000.0, "password")),
-
-            Arguments.of("Valid advisor with mid-range salary",
-                        new User(null, "Mid", "Advisor", LocalDate.of(1988, 6, 15),
-                               "mid.advisor@crediya.com", "222222222", "3002222222",
-                               2, 80000.0, "password")),
-
-            Arguments.of("Valid admin with high salary",
-                        new User(null, "High", "Admin", LocalDate.of(1985, 12, 25),
-                               "high.admin@crediya.com", "333333333", "3003333333",
-                               3, 150000.0, "password")),
-
-            Arguments.of("Exact age limit user",
-                        new User(null, "Edge", "Case", LocalDate.now().minusYears(18),
-                               "edge@crediya.com", "444444444", "3004444444",
-                               1, 30000.0, "password"))
-        );
     }
 }

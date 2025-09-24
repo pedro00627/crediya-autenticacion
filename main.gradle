@@ -10,8 +10,8 @@ allprojects {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/pedro00627/crediya-common")
             credentials {
-                username = project.findProperty('githubActor') ?: System.getenv("GITHUB_ACTOR") ?: ""
-                password = project.findProperty('githubToken') ?: System.getenv("GITHUB_TOKEN") ?: ""
+                username = project.findProperty("gpr.user") ?: project.findProperty("githubActor") ?: System.getenv("GITHUB_ACTOR") ?: ""
+                password = project.findProperty("gpr.token") ?: project.findProperty("githubToken") ?: System.getenv("GITHUB_TOKEN") ?: ""
             }
         }
     }

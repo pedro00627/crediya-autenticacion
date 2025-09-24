@@ -23,6 +23,56 @@ class UserDataMapperTest {
 
     private UserDataMapper mapper;
 
+    static Stream<Arguments> entityToDomainTestCases() {
+        return Stream.of(
+                Arguments.of(
+                        new UserEntity("admin-1", "Admin", "User", LocalDate.of(1980, 1, 1),
+                                "admin@example.com", "111222333", "3201112222", 3, 100000.0, "adminPass"),
+                        "Admin entity to domain mapping"
+                ),
+                Arguments.of(
+                        new UserEntity("client-1", "Client", "User", LocalDate.of(1995, 12, 25),
+                                "client@example.com", "444555666", "3154445555", 1, 60000.0, "clientPass"),
+                        "Client entity to domain mapping"
+                ),
+                Arguments.of(
+                        new UserEntity("advisor-1", "Advisor", "User", LocalDate.of(1988, 6, 15),
+                                "advisor@example.com", "777888999", "3187778888", 2, 80000.0, "advisorPass"),
+                        "Advisor entity to domain mapping"
+                ),
+                Arguments.of(
+                        new UserEntity(null, "No", "ID", LocalDate.now(),
+                                "noid@example.com", "000111222", "3200001111", null, null, ""),
+                        "Entity with null ID and role"
+                )
+        );
+    }
+
+    static Stream<Arguments> domainToEntityTestCases() {
+        return Stream.of(
+                Arguments.of(
+                        new User("new-admin-1", "New", "Admin", LocalDate.of(1975, 3, 10),
+                                "newadmin@example.com", "111000111", "3211110000", 3, 120000.0, "newAdminPass"),
+                        "New admin domain to entity mapping"
+                ),
+                Arguments.of(
+                        new User("new-client-1", "New", "Client", LocalDate.of(2000, 7, 4),
+                                "newclient@example.com", "222000222", "3222220000", 1, 45000.0, "newClientPass"),
+                        "New client domain to entity mapping"
+                ),
+                Arguments.of(
+                        new User("new-advisor-1", "New", "Advisor", LocalDate.of(1992, 11, 30),
+                                "newadvisor@example.com", "333000333", "3233330000", 2, 70000.0, "newAdvisorPass"),
+                        "New advisor domain to entity mapping"
+                ),
+                Arguments.of(
+                        new User("empty-role-1", "Empty", "Role", LocalDate.now(),
+                                "emptyrole@example.com", "999000999", "3299990000", null, 50000.0, "emptyRolePass"),
+                        "Domain with null role"
+                )
+        );
+    }
+
     @BeforeEach
     void setUp() {
         mapper = Mappers.getMapper(UserDataMapper.class);
@@ -233,55 +283,5 @@ class UserDataMapperTest {
         assertEquals("12.345.678-9", domain.identityDocument());
         assertEquals("+57 301 234 5678", domain.phone());
         assertEquals(1500000.50, domain.baseSalary());
-    }
-
-    static Stream<Arguments> entityToDomainTestCases() {
-        return Stream.of(
-                Arguments.of(
-                        new UserEntity("admin-1", "Admin", "User", LocalDate.of(1980, 1, 1),
-                                     "admin@example.com", "111222333", "3201112222", 3, 100000.0, "adminPass"),
-                        "Admin entity to domain mapping"
-                ),
-                Arguments.of(
-                        new UserEntity("client-1", "Client", "User", LocalDate.of(1995, 12, 25),
-                                     "client@example.com", "444555666", "3154445555", 1, 60000.0, "clientPass"),
-                        "Client entity to domain mapping"
-                ),
-                Arguments.of(
-                        new UserEntity("advisor-1", "Advisor", "User", LocalDate.of(1988, 6, 15),
-                                     "advisor@example.com", "777888999", "3187778888", 2, 80000.0, "advisorPass"),
-                        "Advisor entity to domain mapping"
-                ),
-                Arguments.of(
-                        new UserEntity(null, "No", "ID", LocalDate.now(),
-                                     "noid@example.com", "000111222", "3200001111", null, null, ""),
-                        "Entity with null ID and role"
-                )
-        );
-    }
-
-    static Stream<Arguments> domainToEntityTestCases() {
-        return Stream.of(
-                Arguments.of(
-                        new User("new-admin-1", "New", "Admin", LocalDate.of(1975, 3, 10),
-                               "newadmin@example.com", "111000111", "3211110000", 3, 120000.0, "newAdminPass"),
-                        "New admin domain to entity mapping"
-                ),
-                Arguments.of(
-                        new User("new-client-1", "New", "Client", LocalDate.of(2000, 7, 4),
-                               "newclient@example.com", "222000222", "3222220000", 1, 45000.0, "newClientPass"),
-                        "New client domain to entity mapping"
-                ),
-                Arguments.of(
-                        new User("new-advisor-1", "New", "Advisor", LocalDate.of(1992, 11, 30),
-                               "newadvisor@example.com", "333000333", "3233330000", 2, 70000.0, "newAdvisorPass"),
-                        "New advisor domain to entity mapping"
-                ),
-                Arguments.of(
-                        new User("empty-role-1", "Empty", "Role", LocalDate.now(),
-                               "emptyrole@example.com", "999000999", "3299990000", null, 50000.0, "emptyRolePass"),
-                        "Domain with null role"
-                )
-        );
     }
 }

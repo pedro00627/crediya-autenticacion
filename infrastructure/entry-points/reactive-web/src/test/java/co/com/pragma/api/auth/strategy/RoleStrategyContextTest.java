@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,10 +20,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class RoleStrategyContextTest {
 
-    @Mock private RoleStrategy clientStrategy;
-    @Mock private RoleStrategy advisorStrategy;
-    @Mock private RoleStrategy adminStrategy;
-    @Mock private LoggerPort logger;
+    @Mock
+    private RoleStrategy clientStrategy;
+    @Mock
+    private RoleStrategy advisorStrategy;
+    @Mock
+    private RoleStrategy adminStrategy;
+    @Mock
+    private LoggerPort logger;
 
     private RoleStrategyContext roleStrategyContext;
 
