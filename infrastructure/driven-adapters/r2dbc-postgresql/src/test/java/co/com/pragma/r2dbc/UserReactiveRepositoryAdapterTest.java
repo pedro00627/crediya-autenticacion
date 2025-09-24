@@ -147,7 +147,7 @@ class UserReactiveRepositoryAdapterTest {
     @Test
     void shouldCheckIfEmailExists() {
         // Arrange
-        String email = "john.doe@example.com";
+        final String email = "john.doe@example.com";
         when(repository.existsByEmail(email)).thenReturn(Mono.just(true));
 
         // Act

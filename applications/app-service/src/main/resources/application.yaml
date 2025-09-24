@@ -5,12 +5,29 @@ spring:
     name: "Autenticacion"
   devtools:
     add-properties: false
-  h2:
-    console:
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/crediya
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    properties:
+      schema: autenticacion
+    pool:
       enabled: true
-      path: "/h2"
+      initial-size: 5
+      max-size: 10
+      max-idle-time: 30m
+      connect-timeout: 5s
+
   profiles:
     include: null
+    active: prod
+logging:
+  config: classpath:log4j2-prod.yaml
+  level:
+    root: info
+    co.com.pragma: debug
+    org.springframework.security: debug # Added for Spring Security debug logs
 management:
   endpoints:
     web:
@@ -23,18 +40,24 @@ management:
   tracing:
     sampling:
       probability: 1.0
-cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
-adapters:
-  r2dbc:
-    host: localhost
-    port: 5432
-    database: crediya
-    schema: autenticacion
-    username: postgres
-    password: P1o2s3G4.
-logging:
-  config: classpath:log4j2-spring.xml
+
 jwt:
-  secret: "your-secret-key-that-is-at-least-256-bits-long"
+  secret: ${JWT_SECRET}
   expiration: 3600000 # 1 hour in milliseconds
+  excluded-paths:
+    - /api/v1/login
+    - /swagger-ui.html
+    - /swagger-ui/**
+    - /webjars/**
+    - /v3/api-docs/**
+    - /actuator/**
+
+security:
+  rules:
+    authorization:
+      - path: /api/v1/usuarios
+        method: POST
+        managerBeanName: postUserCreationAuthorizationManager
+      - path: /api/v1/usuarios
+        method: GET
+        managerBeanName: userAuthorizationManager

@@ -4,7 +4,7 @@ import co.com.pragma.model.log.gateways.LoggerPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -19,7 +19,6 @@ import reactor.test.StepVerifier;
 import java.util.Objects;
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
@@ -27,19 +26,19 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ReactiveAdapterOperationsTest {
 
+    @Mock
     private DummyRepository repository;
+
+    @Mock
     private ObjectMapper mapper;
+
+    @Mock
+    private LoggerPort logger;
 
     private ReactiveAdapterOperations<DummyEntity, DummyData, String, DummyRepository> operations;
 
     @BeforeEach
     void setUp() {
-        repository = Mockito.mock(DummyRepository.class);
-        mapper = Mockito.mock(ObjectMapper.class);
-        LoggerPort logger = Mockito.mock(LoggerPort.class);
-
-        assertNotNull(logger, "LoggerPort mock should not be null after explicit creation");
-
         operations = new TestReactiveAdapterOperations(
                 logger, repository, mapper, DummyEntity::toEntity);
     }
@@ -128,8 +127,8 @@ class ReactiveAdapterOperationsTest {
     }
 
     static class DummyEntity {
-        private String id;
-        private String name;
+        private final String id;
+        private final String name;
 
         public DummyEntity(String id, String name) {
             this.id = id;
@@ -151,7 +150,7 @@ class ReactiveAdapterOperationsTest {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (null == o || getClass() != o.getClass()) return false;
             DummyEntity that = (DummyEntity) o;
             return id.equals(that.id) && name.equals(that.name);
         }
@@ -163,8 +162,8 @@ class ReactiveAdapterOperationsTest {
     }
 
     static class DummyData {
-        private String id;
-        private String name;
+        private final String id;
+        private final String name;
 
         public DummyData(String id, String name) {
             this.id = id;
@@ -182,7 +181,7 @@ class ReactiveAdapterOperationsTest {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (null == o || getClass() != o.getClass()) return false;
             DummyData that = (DummyData) o;
             return id.equals(that.id) && name.equals(that.name);
         }

@@ -1,62 +1,84 @@
 package co.com.pragma.api.config;
 
-import co.com.pragma.api.security.JWTAuthenticationFilter;
 import co.com.pragma.api.security.UserAuthorizationManager;
-import co.com.pragma.model.security.RoleConstants;
+import co.com.pragma.model.log.gateways.LoggerPort;
+import co.com.pragma.security.api.JWTAuthenticationFilter;
+import co.com.pragma.security.api.config.CommonSecurityConfig;
+import co.com.pragma.security.api.config.SecurityFilterChainBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.HttpStatusServerEntryPoint;
+import org.springframework.security.web.server.authorization.HttpStatusServerAccessDeniedHandler;
+import org.springframework.security.web.server.util.matcher.NegatedServerWebExchangeMatcher;
+import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
+import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 
 @Configuration
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
+@EnableConfigurationProperties({SecurityProperties.class, SecurityRulesProperties.class})
+@Import(CommonSecurityConfig.class)
 public class SecurityConfig {
 
-    private static final String[] PUBLIC_API_PATHS = {
-            "/api/v1/login**",
-            "/swagger-ui.html",
-            "/swagger-ui/**",
-            "/webjars/**",
-            "/v3/api-docs/**"
-    };
-    private final JWTAuthenticationFilter jwtAuthenticationFilter;
-    private final UserAuthorizationManager userAuthorizationManager;
+    private final LoggerPort logger;
+    private final SecurityFilterChainBuilder securityFilterChainBuilder;
 
-    public SecurityConfig(JWTAuthenticationFilter jwtAuthenticationFilter, UserAuthorizationManager userAuthorizationManager) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.userAuthorizationManager = userAuthorizationManager;
+    public SecurityConfig(LoggerPort logger,
+                          SecurityFilterChainBuilder securityFilterChainBuilder) {
+        this.logger = logger;
+        this.securityFilterChainBuilder = securityFilterChainBuilder;
     }
 
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+    @Primary
+    public UserAuthorizationManager userAuthorizationManager(LoggerPort logger) {
+        return new UserAuthorizationManager(logger);
+    }
+
+    @Bean
+    @Primary
+    public JWTAuthenticationFilter jwtAuthenticationFilter(co.com.pragma.security.util.JWTUtil jwtUtil,
+                                                           LoggerPort logger,
+                                                           SecurityProperties securityProperties) {
+        return new JWTAuthenticationFilter(jwtUtil, logger, securityProperties);
+    }
+
+    @Bean
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
+                                                         SecurityProperties securityProperties,
+                                                         SecurityRulesProperties securityRulesProperties,
+                                                         JWTAuthenticationFilter jwtAuthenticationFilter) {
+        logger.info("Configuring SecurityWebFilterChain for Autenticacion microservice...");
+
+        // Create a matcher for the paths that should be excluded from security.
+        ServerWebExchangeMatcher excludedPathsMatcher = ServerWebExchangeMatchers.pathMatchers(
+                securityProperties.excludedPaths().toArray(new String[0])
+        );
+
+        // The security filter chain will only apply to paths that are NOT in the exclusion list.
+        ServerWebExchangeMatcher securedPathsMatcher = new NegatedServerWebExchangeMatcher(excludedPathsMatcher);
+
         return http
-                .exceptionHandling(spec -> spec.authenticationEntryPoint(new HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .securityMatcher(securedPathsMatcher)
+                .exceptionHandling(spec -> spec
+                        .authenticationEntryPoint(new HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .accessDeniedHandler(new HttpStatusServerAccessDeniedHandler(HttpStatus.FORBIDDEN)))
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers(PUBLIC_API_PATHS).permitAll()
-                        // Reglas de la historia de usuario
-                        .pathMatchers(HttpMethod.POST, "/api/users").hasAnyRole(RoleConstants.ADMIN, RoleConstants.ADVISOR)
-                        .pathMatchers(HttpMethod.POST, "/api/loans").hasRole(RoleConstants.CLIENT)
-                        // Regla personalizada para obtener usuarios
-                        .pathMatchers(HttpMethod.GET, "/api/v1/usuarios").access(userAuthorizationManager)
-                        // Para el resto de rutas, solo se necesita estar autenticado
-                        .anyExchange().authenticated()
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+                .authorizeExchange(exchanges ->
+                        securityFilterChainBuilder.applyAuthorizationRules(exchanges, securityRulesProperties, securityProperties)
                 )
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

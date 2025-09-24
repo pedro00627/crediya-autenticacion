@@ -336,3 +336,7 @@ gradle-app.setting
 build-cache
 
 .idea
+.env
+
+# Security: Gradle properties with sensitive data
+gradle.properties

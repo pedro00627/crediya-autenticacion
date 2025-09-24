@@ -104,7 +104,7 @@ class RouterRestTest {
 
     @Test
     void saveUserShouldSucceed() {
-        User savedUser = new User("gen-id-123", userModel.firstName(), userModel.lastName(), userModel.birthDate(), userModel.email(), userModel.identityDocument(), userModel.phone(), userModel.roleId(), userModel.baseSalary(),"encryptedPassword");
+        User savedUser = new User("gen-id-123", userModel.firstName(), userModel.lastName(), userModel.birthDate(), userModel.email(), userModel.identityDocument(), userModel.phone(), userModel.roleId(), userModel.baseSalary(), "encryptedPassword");
         UserResponseRecord response = new UserResponseRecord("gen-id-123", "John", "Doe", LocalDate.of(1990, 5, 15), "john.doe@example.com", "123456789", "3001234567", "1", 50000.0);
 
         when(validator.validate(any(UserRequestRecord.class))).thenReturn(Collections.emptySet());
@@ -126,7 +126,7 @@ class RouterRestTest {
     @Test
     @SuppressWarnings("unchecked")
     void saveUserShouldFailOnInvalidRequest() {
-        UserRequestRecord invalidRequest = new UserRequestRecord(null, "Doe", LocalDate.now(), "email", "doc", "phone", "1", 1.0,"");
+        UserRequestRecord invalidRequest = new UserRequestRecord(null, "Doe", LocalDate.now(), "email", "doc", "phone", "1", 1.0, "");
 
         ConstraintViolation<UserRequestRecord> violation = mock(ConstraintViolation.class);
         Path propertyPath = mock(Path.class);
@@ -151,7 +151,7 @@ class RouterRestTest {
 
     @Test
     void saveUserShouldFailOnBusinessException() {
-        String errorMessage = "El correo electrónico 'john.doe@example.com' ya se encuentra registrado.";
+        final String errorMessage = "El correo electrónico 'john.doe@example.com' ya se encuentra registrado.";
 
         when(validator.validate(any(UserRequestRecord.class))).thenReturn(Collections.emptySet());
         when(userDTOMapper.toModel(any(UserRequestRecord.class))).thenReturn(userModel);

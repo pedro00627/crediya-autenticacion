@@ -1,0 +1,40 @@
+Configuration:
+  status: ERROR
+
+  Appenders:
+    Console:
+      name: Console
+      target: SYSTEM_OUT
+      PatternLayout:
+        pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+
+  Loggers:
+    Logger:
+      - name: org.springframework
+        level: info
+        additivity: false
+        AppenderRef:
+          - ref: Console
+
+      - name: io.r2dbc
+        level: error
+        additivity: false
+        AppenderRef:
+          - ref: Console
+
+      - name: reactor.netty
+        level: error
+        additivity: false
+        AppenderRef:
+          - ref: Console
+
+      - name: co.com.pragma
+        level: debug
+        additivity: false
+        AppenderRef:
+          - ref: Console
+
+    Root:
+      level: info
+      AppenderRef:
+        - ref: Console

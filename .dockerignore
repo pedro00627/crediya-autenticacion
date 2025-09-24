@@ -1,0 +1,7 @@
+# Ignorar carpetas y archivos innecesarios
+build/
+.gradle/
+*.jar
+*.class
+*.log
+node_modules/

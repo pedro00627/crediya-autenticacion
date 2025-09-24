@@ -1,12 +1,13 @@
 package co.com.pragma;
 
-import co.com.pragma.r2dbc.config.PostgresqlConnectionProperties;
+import co.com.pragma.security.api.config.CommonSecurityConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 
 @SpringBootApplication
-@EnableConfigurationProperties({PostgresqlConnectionProperties.class})
+@ComponentScan(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = CommonSecurityConfig.class))
 public class MainApplication {
     public static void main(String[] args) {
         SpringApplication.run(MainApplication.class, args);

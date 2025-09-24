@@ -12,7 +12,7 @@ buildCache {
     }
 }
 
-rootProject.name = 'CrediYa'
+rootProject.name = 'Autenticacion'
 
 include ':app-service'
 project(':app-service').projectDir = file('./applications/app-service')
@@ -30,4 +30,4 @@ include ':reactive-web'
 project(':reactive-web').projectDir = file('./infrastructure/entry-points/reactive-web')
 
 include ':commonutils'
-project(':commonutils').projectDir = file('./infrastructure/helpers/commonutils')
+project(':commonutils').projectDir = file('./infrastructure/shared-infrastructure/commonutils')

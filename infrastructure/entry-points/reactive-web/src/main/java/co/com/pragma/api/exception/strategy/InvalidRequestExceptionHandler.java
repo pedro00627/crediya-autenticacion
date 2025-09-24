@@ -31,7 +31,7 @@ public class InvalidRequestExceptionHandler implements ExceptionHandlerStrategy 
 
     @Override
     public Mono<ErrorResponseWrapper> handle(Throwable ex, ServerWebExchange exchange) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+        final HttpStatus status = HttpStatus.BAD_REQUEST;
         InvalidRequestException exception = (InvalidRequestException) ex;
 
         Map<String, String> messages = exception.getViolations().stream()

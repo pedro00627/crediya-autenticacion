@@ -33,7 +33,7 @@ public abstract class ReactiveAdapterOperations<E, D, I, R extends ReactiveCrudR
     }
 
     protected E toEntity(D data) {
-        return data != null ? toEntityFn.apply(data) : null;
+        return null != data ? toEntityFn.apply(data) : null;
     }
 
     public Mono<E> saveUser(E entity) {
