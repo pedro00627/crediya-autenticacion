@@ -27,7 +27,7 @@ public class BusinessExceptionHandler implements ExceptionHandlerStrategy {
 
     @Override
     public Mono<ErrorResponseWrapper> handle(Throwable ex, ServerWebExchange exchange) {
-        HttpStatus status = HttpStatus.CONFLICT;
+        final HttpStatus status = HttpStatus.CONFLICT;
         logger.error("Violación de regla de negocio para la petición [{}]: {}", ex);
 
         ErrorBody body = new ErrorBody(status.value(), "Business Rule Violation", ex.getMessage(), null);

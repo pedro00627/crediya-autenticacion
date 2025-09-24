@@ -1,16 +1,14 @@
 buildscript {
     ext {
-        cleanArchitectureVersion = '3.24.0'
-        springBootVersion = '3.5.4'
-        sonarVersion = '6.2.0.5505'
-        jacocoVersion = '0.8.13'
+        cleanArchitectureVersion = '3.26.1'
+        springBootVersion = '3.5.6'
+        sonarVersion = '6.3.1.5724'
         pitestVersion = '1.19.0-rc.1'
-        lombokVersion = '1.18.38'
-        mapstructVersion = '1.6.3'
-        springdocVersion = '2.5.0'
-        reactiveCommonsMapperVersion = '0.1.0'
-        archunitVersion = '1.4.1'
-        jjwtVersion = '0.12.6'
+    }
+    repositories {
+        mavenCentral()
+        maven { url = "https://repo.spring.io/snapshot" }
+        maven { url = "https://repo.spring.io/milestone" }
     }
 }
 
@@ -20,20 +18,35 @@ plugins {
     id 'info.solidsoft.pitest' version "${pitestVersion}" apply false
     id 'org.sonarqube' version "${sonarVersion}"
     id 'jacoco'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+ext {
+    jacocoVersion = '0.8.13'
+    lombokVersion = '1.18.38'
+    mapstructVersion = '1.6.3'
+    springdocVersion = '2.5.0'
+    reactiveCommonsMapperVersion = '0.1.0'
+    archunitVersion = '1.4.1'
+    jjwtVersion = '0.12.6'
+    commonVersion = '0.0.61'
 }
 
 subprojects {
-    configurations {
-        all {
-            exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-            exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
-            exclude group: 'ch.qos.logback', module: 'logback-classic'
-            exclude group: 'ch.qos.logback', module: 'logback-core'
-            exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-            exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
-            exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-            exclude group: 'log4j', module: 'log4j-jcl'
+    if (!project.path.contains(':model') && !project.path.contains(':usecase')) {
+        configurations.configureEach {
+            resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+                if (details.requested.group == 'org.springframework.boot' && details.requested.name == 'spring-boot-starter-logging') {
+                    details.useTarget "org.springframework.boot:spring-boot-starter-log4j2:${springBootVersion}"
+                }
+            }
         }
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
     }
 }
 
@@ -45,6 +58,7 @@ sonar {
         property "sonar.sources", "src,deployment,settings.gradle,main.gradle,build.gradle,${modules.collect { "${it}/build.gradle" }.join(',')}"
         property "sonar.exclusions", "**/MainApplication.java"
         property "sonar.tests", "src/test"
+        property "sonar.java.binaries", "**/build/classes/java/main"
         property "sonar.junit.reportsPath", "**/build/test-results/test"
         property "sonar.java.coveragePlugin", "jacoco"
         property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacocoMergedReport/jacocoMergedReport.xml"

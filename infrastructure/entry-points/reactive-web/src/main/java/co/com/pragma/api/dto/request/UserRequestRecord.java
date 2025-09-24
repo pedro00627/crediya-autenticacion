@@ -1,5 +1,6 @@
 package co.com.pragma.api.dto.request;
 
+import co.com.pragma.model.constants.ErrorMessages;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,25 +9,25 @@ import jakarta.validation.constraints.Past;
 import java.time.LocalDate;
 
 public record UserRequestRecord(
-        @NotBlank(message = "El primer nombre no puede estar vacío")
+        @NotBlank(message = ErrorMessages.FIRST_NAME_REQUIRED)
         String firstName,
-        @NotBlank(message = "El apellido no puede estar vacío")
+        @NotBlank(message = ErrorMessages.LAST_NAME_REQUIRED)
         String lastName,
-        @NotNull(message = "La fecha de nacimiento no puede ser nula")
+        @NotNull(message = ErrorMessages.BIRTH_DATE_REQUIRED)
         @Past
         LocalDate birthDate,
-        @NotBlank(message = "El correo electrónico no puede estar vacío")
+        @NotBlank(message = ErrorMessages.EMAIL_FIELD_REQUIRED)
         @Email
         String email,
-        @NotBlank(message = "El documento de identidad no puede estar vacío")
+        @NotBlank(message = ErrorMessages.IDENTITY_DOCUMENT_REQUIRED)
         String identityDocument,
-        @NotBlank(message = "El teléfono no puede estar vacío")
+        @NotBlank(message = ErrorMessages.PHONE_REQUIRED)
         String phone,
-        @NotBlank(message = "El ID del rol no puede estar vacío")
+        @NotBlank(message = ErrorMessages.ROLE_ID_REQUIRED)
         String roleId,
-        @NotNull(message = "El salario base no puede ser nulo")
+        @NotNull(message = ErrorMessages.BASE_SALARY_REQUIRED)
         Double baseSalary,
-        @NotBlank(message = "La contraseña no puede estar vacía")
+        @NotBlank(message = ErrorMessages.PASSWORD_REQUIRED)
         String password
 ) {
 }

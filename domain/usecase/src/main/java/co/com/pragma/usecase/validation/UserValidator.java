@@ -32,14 +32,14 @@ public class UserValidator {
     }
 
     private Mono<Void> validateSalaryRange(User user) {
-        if (user.baseSalary() >= MIN_BASE_SALARY && user.baseSalary() <= MAX_BASE_SALARY) {
+        if (MIN_BASE_SALARY <= user.baseSalary() && MAX_BASE_SALARY >= user.baseSalary()) {
             return Mono.empty();
         }
         return Mono.error(new BusinessException(SALARY_OUT_OF_RANGE_MESSAGE));
     }
 
     private Mono<Void> validateRoleExistence(User user) {
-        if (user.roleId() == null) {
+        if (null == user.roleId()) {
             return Mono.empty();
         }
         return roleRepository.existsById(user.roleId())

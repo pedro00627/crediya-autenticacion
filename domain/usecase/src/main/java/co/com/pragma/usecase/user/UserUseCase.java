@@ -4,6 +4,7 @@ import co.com.pragma.model.security.PasswordEncryptor;
 import co.com.pragma.model.user.User;
 import co.com.pragma.model.user.repository.UserRepository;
 import co.com.pragma.usecase.validation.UserValidator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class UserUseCase {
@@ -23,7 +24,7 @@ public class UserUseCase {
                 .map(userToSave -> {
                     String encodedPassword = passwordEncryptor.encode(userToSave.password());
                     return new User(
-                            userToSave.id(),
+                            null, //UUID.randomUUID().toString(),
                             userToSave.firstName(),
                             userToSave.lastName(),
                             userToSave.birthDate(),
@@ -40,5 +41,9 @@ public class UserUseCase {
 
     public Mono<User> getUserByEmail(String email) {
         return userRepository.getUserByEmail(email);
+    }
+
+    public Flux<User> getUserByEmailOrIdentityDocument(String email, String identityDocument) {
+        return userRepository.getUserByEmailOrIdentityDocument(email, identityDocument);
     }
 }

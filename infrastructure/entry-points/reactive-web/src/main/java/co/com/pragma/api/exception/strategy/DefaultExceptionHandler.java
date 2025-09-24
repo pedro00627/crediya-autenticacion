@@ -27,10 +27,10 @@ public class DefaultExceptionHandler implements ExceptionHandlerStrategy {
 
     @Override
     public Mono<ErrorResponseWrapper> handle(Throwable ex, ServerWebExchange exchange) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        final HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         logger.error("Ocurrió una excepción no controlada para la petición", ex);
 
-        String message = "Ocurrió un error inesperado. Por favor, contacte al soporte.";
+        final String message = "Ocurrió un error inesperado. Por favor, contacte al soporte.";
         ErrorBody body = new ErrorBody(status.value(), "Internal Server Error", message, null);
 
         return Mono.just(new ErrorResponseWrapper(status, body));
