@@ -34,19 +34,16 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 4. Exportar credenciales para GitHub Packages
-      - name: Exportar credenciales para GitHub Packages
-        run: |
-          echo "GITHUB_ACTOR=${{ github.actor }}" >> $GITHUB_ENV
-          echo "GITHUB_TOKEN=${{ secrets.PAT }}" >> $GITHUB_ENV
-
-      # 5. Configura Gradle con setup optimizado
+      # 4. Configura Gradle con setup optimizado
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # 6. Ejecuta el build estándar (compila, ejecuta tests unitarios y de integración)
+      # 5. Ejecuta el build estándar con credenciales (compila, ejecuta tests unitarios y de integración)
       - name: Build with Gradle
         run: ./gradlew build
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
 
   # --- Job 2: El Filtro Profundo (Solo para Pushes a la rama principal) ---
   quality_gate:
@@ -70,9 +67,16 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # 4. Configura Gradle con setup optimizado
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       # 5. Ejecuta las tareas lentas de análisis de calidad
       - name: Run Mutation and Coverage Analysis
         run: ./gradlew pitest jacocoTestReport
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
 
       # 6. (Opcional pero recomendado) Sube los reportes como artefactos para poder revisarlos
       - name: Upload Pitest Report
