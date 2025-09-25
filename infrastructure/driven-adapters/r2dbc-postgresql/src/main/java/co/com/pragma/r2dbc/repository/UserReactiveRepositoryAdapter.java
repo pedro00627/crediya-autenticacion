@@ -39,15 +39,23 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
                 .doOnSubscribe(subscription -> logger.info("Guardando usuario en la base de datos con email: {}", logger.maskEmail(user.email())))
                 .map(userDataMapper::toDomain) // Map the saved entity back to the domain model
                 .doOnSuccess(savedUser -> logger.info("Usuario guardado exitosamente en BD con ID: {}", savedUser.id()))
-                // Añadimos un log específico para el caso de error durante el guardado
-                .doOnError(error -> logger.error("Error al guardar el usuario", error))
+                .doOnError(error -> logger.error("Error al guardar el usuario con email: " + logger.maskEmail(user.email()), error))
+                .onErrorMap(throwable -> {
+                    logger.error("Error de conexión con la base de datos al guardar usuario", throwable);
+                    return new RuntimeException("Error de conexión con la base de datos. Intente nuevamente.", throwable);
+                })
                 .as(transactionalOperator::transactional);
     }
 
     @Override
     public Mono<Boolean> existByEmail(String email) {
         logger.debug("Verificando existencia de email en BD: {}", logger.maskEmail(email));
-        return repository.existsByEmail(email);
+        return repository.existsByEmail(email)
+                .doOnError(error -> logger.error("Error al verificar existencia de email: " + logger.maskEmail(email), error))
+                .onErrorMap(throwable -> {
+                    logger.error("Error de conexión con la base de datos al verificar email", throwable);
+                    return new RuntimeException("Error de conexión con la base de datos. Intente nuevamente.", throwable);
+                });
     }
 
     @Override

@@ -4,6 +4,7 @@ import co.com.pragma.api.security.UserAuthorizationManager;
 import co.com.pragma.model.log.gateways.LoggerPort;
 import co.com.pragma.security.api.JWTAuthenticationFilter;
 import co.com.pragma.security.api.config.SecurityFilterChainBuilder;
+import co.com.pragma.security.config.SecurityProperties;
 import co.com.pragma.security.util.JWTUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

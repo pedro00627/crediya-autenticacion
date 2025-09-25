@@ -29,12 +29,12 @@ Configuration:
           - ref: Console
 
       - name: co.com.pragma
-        level: debug
+        level: info
         additivity: false
         AppenderRef:
           - ref: Console
 
     Root:
-      level: info
+      level: debug
       AppenderRef:
         - ref: Console
