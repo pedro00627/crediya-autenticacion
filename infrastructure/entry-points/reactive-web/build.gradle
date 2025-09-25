@@ -13,6 +13,7 @@ dependencies {
     // Dependencias a las librerías common
     implementation "co.com.pragma:crediya-common-starter:${commonVersion}"
     implementation "co.com.pragma:crediya-common-core:${commonVersion}"
+    implementation "co.com.pragma:crediya-common-security:${commonVersion}"
 
     testImplementation project(':app-service')
 }

@@ -118,7 +118,7 @@ class RouterRestTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(userRequest)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectBody(UserResponseRecord.class)
                 .isEqualTo(response);
     }

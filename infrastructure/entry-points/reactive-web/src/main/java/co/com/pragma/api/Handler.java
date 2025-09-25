@@ -10,6 +10,8 @@ import co.com.pragma.model.user.User;
 import co.com.pragma.usecase.user.UserUseCase;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.web.session.HttpSessionCreatedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -37,14 +39,13 @@ public class Handler implements UserApi {
 
     @Override
     public Mono<ServerResponse> saveUseCase(ServerRequest serverRequest) {
-        // ToDo mover logger al flujo reactivo para enmascarar el email
         logger.info("Recibida petición para guardar usuario en la ruta: {}", serverRequest.path());
         return serverRequest.bodyToMono(UserRequestRecord.class)
                 .switchIfEmpty(Mono.error(new ServerWebInputException(ErrorMessages.INVALID_REQUEST_BODY))) // Handle empty body
                 .flatMap(this::validateRequest) // Validate the DTO
                 .map(mapper::toModel)
                 .flatMap(useCase::saveUser)
-                .flatMap(user -> ServerResponse.ok()
+                .flatMap(user -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(APPLICATION_JSON)
                         .bodyValue(mapper.toResponse(user)));
     }

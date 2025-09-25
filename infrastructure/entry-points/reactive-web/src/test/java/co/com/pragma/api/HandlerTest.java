@@ -144,7 +144,7 @@ class HandlerTest {
         // Assert
         StepVerifier.create(result)
                 .assertNext(response -> {
-                    assertEquals(200, response.statusCode().value());
+                    assertEquals(201, response.statusCode().value());
                 })
                 .verifyComplete();
 
@@ -339,7 +339,7 @@ class HandlerTest {
         // Assert
         if (shouldSucceed) {
             StepVerifier.create(result)
-                    .assertNext(response -> assertEquals(200, response.statusCode().value(), scenario))
+                    .assertNext(response -> assertEquals(201, response.statusCode().value(), scenario))
                     .verifyComplete();
         } else {
             StepVerifier.create(result)
